@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_booty_list"
+        android:icon="@drawable/ic_steering_wheel"
+        android:title="@string/title_quests" />
+
+    <item
+        android:id="@+id/navigation_treasure_map"
+        android:icon="@drawable/ic_treasure_map"
+        android:title="@string/title_map" />
+
+    <item
+        android:id="@+id/navigation_aquired_booties"
+        android:icon="@drawable/ic_booty"
+        android:title="@string/title_aquired" />
+
+</menu>
