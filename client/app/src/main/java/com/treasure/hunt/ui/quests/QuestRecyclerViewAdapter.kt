@@ -5,14 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.treasure.hunt.R
 import com.treasure.hunt.data.Treasure
 
 
-class QuestRecyclerViewAdapter(context: Context, private var data: List<Treasure>) : RecyclerView.Adapter<QuestRecyclerViewAdapter.ViewHolder>() {
+class QuestRecyclerViewAdapter(val context: Context, private var data: List<Treasure>) : RecyclerView.Adapter<QuestRecyclerViewAdapter.ViewHolder>() {
 
-    public var clickListener : View.OnClickListener? = null
     var inflater: LayoutInflater = LayoutInflater.from(context)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -33,7 +33,7 @@ class QuestRecyclerViewAdapter(context: Context, private var data: List<Treasure
         holder.estimatedValueView.text = "Trésor estimé: ${treasure.estimated_value} "
         holder.questLengthView.text = "Durée de la quête: ${treasure.quest_length}"
         holder.questItemRootView.setOnClickListener {
-            print("Clicked on item $position")
+            Toast.makeText(context,"Emplacement: ${treasure.lattitude}, ${treasure.longitude}", Toast.LENGTH_SHORT).show()
         }
     }
 
