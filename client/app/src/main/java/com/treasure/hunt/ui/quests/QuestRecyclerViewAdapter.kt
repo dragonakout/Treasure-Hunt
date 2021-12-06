@@ -12,6 +12,7 @@ import com.treasure.hunt.data.Treasure
 
 class QuestRecyclerViewAdapter(context: Context, private var data: List<Treasure>) : RecyclerView.Adapter<QuestRecyclerViewAdapter.ViewHolder>() {
 
+    public var clickListener : View.OnClickListener? = null
     var inflater: LayoutInflater = LayoutInflater.from(context)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -24,22 +25,25 @@ class QuestRecyclerViewAdapter(context: Context, private var data: List<Treasure
     override fun getItemCount(): Int {
         return data.size
     }
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
 
-        var treasureNameView : TextView = itemView.findViewById(R.id.treasureNameTextView)
-        var estimatedValueView : TextView = itemView.findViewById(R.id.estimatedValueTextView)
-        var questLengthView : TextView = itemView.findViewById(R.id.questLengthTextView)
-
-        override fun onClick(v: View?) {
-            print("Clicked on item ${v?.id}")
-        }
-    }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val treasure: Treasure = data[position]
         holder.treasureNameView.text = "${treasure.size} ${treasure.name} ${treasure.adjective}"
         holder.estimatedValueView.text = "Trésor estimé: ${treasure.estimated_value} "
         holder.questLengthView.text = "Durée de la quête: ${treasure.quest_length}"
+        holder.questItemRootView.setOnClickListener {
+            print("Clicked on item $position")
+        }
+    }
+
+
+    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+
+        var treasureNameView : TextView = itemView.findViewById(R.id.treasureNameTextView)
+        var estimatedValueView : TextView = itemView.findViewById(R.id.estimatedValueTextView)
+        var questLengthView : TextView = itemView.findViewById(R.id.questLengthTextView)
+        var questItemRootView : View = itemView.findViewById(R.id.quest_item_root)
     }
 }
 
