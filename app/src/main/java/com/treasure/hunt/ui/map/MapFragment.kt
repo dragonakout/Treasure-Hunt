@@ -12,7 +12,7 @@ import com.treasure.hunt.databinding.FragmentMapBinding
 
 class MapFragment : Fragment() {
 
-    private lateinit var dashboardViewModel: DashboardViewModel
+    private lateinit var mapViewModel: MapViewModel
     private var _binding: FragmentMapBinding? = null
 
     // This property is only valid between onCreateView and
@@ -24,14 +24,14 @@ class MapFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
-        dashboardViewModel =
-                ViewModelProvider(this).get(DashboardViewModel::class.java)
+        mapViewModel =
+                ViewModelProvider(this).get(MapViewModel::class.java)
 
         _binding = FragmentMapBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
         val textView: TextView = binding.textDashboard
-        dashboardViewModel.text.observe(viewLifecycleOwner, Observer {
+        mapViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
         })
         return root

@@ -6,10 +6,18 @@
     android:layout_height="match_parent"
     tools:context=".ui.quests.QuestsFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
-        app:layout_constraintTop_toTopOf="parent"
-        android:id="@+id/quests_list"
-        android:layout_width="match_parent"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swiperefresh"
         android:layout_height="match_parent"
-        android:layout_marginBottom="@dimen/bottom_nav_height"/>
+         android:layout_width="match_parent"
+        android:layout_marginBottom="@dimen/bottom_nav_height">
+
+        <androidx.recyclerview.widget.RecyclerView
+            app:layout_constraintTop_toTopOf="parent"
+            android:id="@+id/quests_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
