@@ -46,7 +46,7 @@ class TreasureMapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onMapReady(map: GoogleMap) {
         val coords = LatLng(45.38206, -71.92831) // UdeS
-        map.setMinZoomPreference(10.0f)
+        map.setMinZoomPreference(13.0f)
         map.setMaxZoomPreference(18.0f)
         map.setMapStyle(MapStyleOptions.loadRawResourceStyle(activity as Context, R.raw.map_style))
 
