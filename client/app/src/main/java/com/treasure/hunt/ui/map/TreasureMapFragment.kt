@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.gms.maps.*
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.GroundOverlayOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.treasure.hunt.MainActivity
@@ -44,11 +46,16 @@ class TreasureMapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onMapReady(map: GoogleMap) {
         val coords = LatLng(45.38206, -71.92831) // UdeS
-        map.setMinZoomPreference(15.0f)
+        map.setMinZoomPreference(10.0f)
         map.setMaxZoomPreference(18.0f)
         map.setMapStyle(MapStyleOptions.loadRawResourceStyle(activity as Context, R.raw.map_style))
 
         map.moveCamera(CameraUpdateFactory.newLatLng(coords))
+
+        val mark = GroundOverlayOptions()
+            .image(BitmapDescriptorFactory.fromResource(R.raw.img_x_mark))
+            .position(LatLng(45.38745, -71.899185), 50f, 50f)
+        map.addGroundOverlay(mark);
 
     }
 

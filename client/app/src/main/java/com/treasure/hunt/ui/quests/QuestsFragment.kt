@@ -72,7 +72,9 @@ class QuestsFragment : Fragment() {
             val booty_adj = POSSIBLE_BOOTY_ADJECTIVE[Random.Default.nextInt(0,POSSIBLE_BOOTY_ADJECTIVE.size)]
             val booty_value = Random.Default.nextInt(5,20) * 1000
             val booty_value_mul = 1 + (Random.Default.nextInt(1,10) / 10.0)
-            val treasure = Treasure(i,booty_size,booty_adj,booty_name,0.0f,0.0f, booty_value, booty_value * booty_value_mul,"1h")
+            val booty_lat = MINIMUM_LATTITUDE + Random.Default.nextFloat() * (MAXIMUM_LATTITUDE - MINIMUM_LATTITUDE)
+            val booty_lon = MINIMUM_LONGITIDE + Random.Default.nextFloat() * (MAXIMUM_LONGITIDE - MINIMUM_LONGITIDE)
+            val treasure = Treasure(i, booty_size, booty_adj, booty_name, booty_lat.toFloat(), booty_lon.toFloat(), booty_value, booty_value * booty_value_mul,"1h")
             list.add(treasure)
         }
         return list
@@ -82,5 +84,10 @@ class QuestsFragment : Fragment() {
         val POSSIBLE_BOOTY_SIZE = listOf("Gigantesque", "Immense", "Gros", "Abondant", "Grand", "Maigre", "Petit", "Massif")
         val POSSIBLE_BOOTY_NAME = listOf("trésor", "héritage", "magot", "butin")
         val POSSIBLE_BOOTY_ADJECTIVE = listOf("maudit", "mythique", "fantastique", "légendaire", "épique", "glorieux", "oublié", "prisé", "sanglant", "royal", "scintillant", "inimaginable")
+
+        val MINIMUM_LATTITUDE = 45.37167696186306
+        val MAXIMUM_LATTITUDE = 45.429208924836395
+        val MINIMUM_LONGITIDE = -71.96296752784556
+        val MAXIMUM_LONGITIDE = -71.86304785226521
     }
 }
