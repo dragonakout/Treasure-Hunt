@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 class BootyViewModel : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
-        value = "This is notifications Fragment"
+        value = "This is the booty Fragment"
     }
     val text: LiveData<String> = _text
 }
