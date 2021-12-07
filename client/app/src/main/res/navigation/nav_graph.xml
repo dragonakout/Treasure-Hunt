@@ -13,7 +13,7 @@
 
     <fragment
         android:id="@+id/navigation_treasure_map"
-        android:name="com.treasure.hunt.ui.map.MapFragment"
+        android:name="com.treasure.hunt.ui.map.TreasureMapFragment"
         android:label="@string/title_map"
         tools:layout="@layout/fragment_map" />
 
