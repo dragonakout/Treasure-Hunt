@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.os.bundleOf
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.treasure.hunt.R
 import com.treasure.hunt.data.Treasure
@@ -33,7 +35,8 @@ class QuestRecyclerViewAdapter(val context: Context, private var data: List<Trea
         holder.estimatedValueView.text = "Trésor estimé: ${treasure.estimated_value} "
         holder.questLengthView.text = "Durée de la quête: ${treasure.quest_length}"
         holder.questItemRootView.setOnClickListener {
-            Toast.makeText(context,"Emplacement: ${treasure.lattitude}, ${treasure.longitude}", Toast.LENGTH_SHORT).show()
+            val bundle = bundleOf(Pair("lattitude", treasure.lattitude.toFloat()), Pair("longitude", treasure.longitude.toFloat()))
+            holder.itemView.findNavController().navigate(R.id.action_navigation_booty_list_to_navigation_treasure_map, bundle)
         }
     }
 

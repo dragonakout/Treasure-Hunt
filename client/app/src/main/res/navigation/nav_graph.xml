@@ -9,13 +9,24 @@
         android:id="@+id/navigation_booty_list"
         android:name="com.treasure.hunt.ui.quests.QuestsFragment"
         android:label="@string/title_quests"
-        tools:layout="@layout/fragment_quests" />
+        tools:layout="@layout/fragment_quests" >
+        <action
+            android:id="@+id/action_navigation_booty_list_to_navigation_treasure_map"
+            app:destination="@id/navigation_treasure_map" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_treasure_map"
         android:name="com.treasure.hunt.ui.map.TreasureMapFragment"
         android:label="@string/title_map"
-        tools:layout="@layout/fragment_map" />
+        tools:layout="@layout/fragment_map" >
+        <argument
+            android:name="lattitude"
+            app:argType="float" />
+        <argument
+            android:name="longitude"
+            app:argType="float" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_aquired_booties"

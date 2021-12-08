@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.treasure.hunt.MainActivity
 import com.treasure.hunt.data.Treasure
 import com.treasure.hunt.databinding.FragmentQuestsBinding
 import kotlin.random.Random
@@ -45,7 +46,7 @@ class QuestsFragment : Fragment() {
             refreshLayout.isRefreshing = false
         }
         recyclerView.layoutManager = LinearLayoutManager(activity as Context);
-        val adapter = QuestRecyclerViewAdapter(activity as Context, createTreasures() )
+        val adapter = QuestRecyclerViewAdapter(activity as Context, (activity as MainActivity).treasures )
         recyclerView.adapter = adapter
         return root
     }
@@ -62,32 +63,5 @@ class QuestsFragment : Fragment() {
 
     private fun updateList() {
         print("Updated list!")
-    }
-
-    fun createTreasures() : List<Treasure>{
-        val list : MutableList<Treasure> = mutableListOf()
-        for(i in 0..9) {
-            val booty_size = POSSIBLE_BOOTY_SIZE[Random.Default.nextInt(0,POSSIBLE_BOOTY_SIZE.size)]
-            val booty_name = POSSIBLE_BOOTY_NAME[Random.Default.nextInt(0,POSSIBLE_BOOTY_NAME.size)]
-            val booty_adj = POSSIBLE_BOOTY_ADJECTIVE[Random.Default.nextInt(0,POSSIBLE_BOOTY_ADJECTIVE.size)]
-            val booty_value = Random.Default.nextInt(5,20) * 1000
-            val booty_value_mul = 1 + (Random.Default.nextInt(1,10) / 10.0)
-            val booty_lat = MINIMUM_LATTITUDE + Random.Default.nextFloat() * (MAXIMUM_LATTITUDE - MINIMUM_LATTITUDE)
-            val booty_lon = MINIMUM_LONGITIDE + Random.Default.nextFloat() * (MAXIMUM_LONGITIDE - MINIMUM_LONGITIDE)
-            val treasure = Treasure(i, booty_size, booty_adj, booty_name, booty_lat.toFloat(), booty_lon.toFloat(), booty_value, booty_value * booty_value_mul,"1h")
-            list.add(treasure)
-        }
-        return list
-    }
-
-    companion object {
-        val POSSIBLE_BOOTY_SIZE = listOf("Gigantesque", "Immense", "Gros", "Abondant", "Grand", "Maigre", "Petit", "Massif")
-        val POSSIBLE_BOOTY_NAME = listOf("trésor", "héritage", "magot", "butin")
-        val POSSIBLE_BOOTY_ADJECTIVE = listOf("maudit", "mythique", "fantastique", "légendaire", "épique", "glorieux", "oublié", "prisé", "sanglant", "royal", "scintillant", "inimaginable")
-
-        val MINIMUM_LATTITUDE = 45.37167696186306
-        val MAXIMUM_LATTITUDE = 45.429208924836395
-        val MINIMUM_LONGITIDE = -71.96296752784556
-        val MAXIMUM_LONGITIDE = -71.86304785226521
     }
 }
