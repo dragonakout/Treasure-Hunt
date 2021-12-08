@@ -8,7 +8,6 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -20,6 +19,7 @@ import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.treasure.hunt.data.Treasure
 import com.treasure.hunt.databinding.ActivityMainBinding
 import kotlin.random.Random
@@ -59,6 +59,11 @@ class MainActivity : AppCompatActivity() {
                 R.id.navigation_booty_list, R.id.navigation_treasure_map, R.id.navigation_aquired_booties))
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        geofencingClient.removeGeofences(geofencePendingIntent)
     }
 
     private fun requestLocationPermission() {
@@ -124,7 +129,7 @@ class MainActivity : AppCompatActivity() {
             geofences.add(
                 Geofence.Builder()
                     .setRequestId(treasure.id.toString())
-                    .setCircularRegion(treasure.longitude, treasure.lattitude, 100f)
+                    .setCircularRegion(treasure.longitude, treasure.lattitude, 500f)
                     .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
                     .setExpirationDuration(Geofence.NEVER_EXPIRE) // 86400000ms for 24h of duration
                     .build()
