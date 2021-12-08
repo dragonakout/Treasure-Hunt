@@ -5,11 +5,11 @@ const gen = require('../Generateur');
 
 /* GET parties listing. */
 router.get('/', function (req, res, next) {
-  res.send(gen.liste_partie);
+  res.send(gen.listeTresors);
 });
 
 router.get('/:id', function (req, res, next) {
-  res.send(gen.liste_partie[req.params.id]);
+  res.send(gen.listeTresors[req.params.id]);
 });
 
 module.exports = router;

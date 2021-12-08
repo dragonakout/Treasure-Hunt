@@ -11,3 +11,14 @@ data class Treasure(
     val actual_value: Double,
     val quest_length: String,
 )
+
+
+/*data class Treasure(
+    val id: Int,
+    val name: String,
+    val estimated_value: Int,
+    val actual_value: Int,
+    val quest_length: Float,
+    val lattitude: Float,
+    val longitude: Float,
+)*/

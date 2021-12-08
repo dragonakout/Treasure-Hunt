@@ -1,11 +1,23 @@
+/*const uuidv4 = require("uuid/v4")
 class Joueur {
-  constructor (prenom, nom, age, rang, pays) {
-    this.prenom = prenom;
+  constructor (nom, photoProfil) {
+    this.id = uuidv4;
     this.nom = nom;
-    this.age = age;
-    this.rang = rang;
-    this.pays = pays;
+    this.tresorsCompletes = [];
+    this.tresorsRestants = [];
+    this.photoProfil = photoProfil;
+  }
+
+  toJSON () {
+    return {
+      'id': this.id,
+      'nom': this.nom,
+      'tresorsCompletes': this.tresorsCompletes,
+      'tresorsRestants': this.tresorsRestants,
+      'this.photoProfil': this.photoProfil
+    };
   }
 }
 
 module.exports = Joueur;
+*/
