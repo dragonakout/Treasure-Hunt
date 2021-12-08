@@ -18,9 +18,7 @@ import kotlin.random.Random
 
 class QuestsFragment : Fragment() {
 
-    lateinit var booties : List<Treasure>
 
-    private lateinit var questsViewModel: QuestsViewModel
     private var _binding: FragmentQuestsBinding? = null
 
     // This property is only valid between onCreateView and
@@ -33,8 +31,6 @@ class QuestsFragment : Fragment() {
             savedInstanceState: Bundle?
     ): View {
 
-        questsViewModel =
-                ViewModelProvider(this).get(QuestsViewModel::class.java)
 
         _binding = FragmentQuestsBinding.inflate(inflater, container, false)
         val root: View = binding.root
@@ -62,6 +58,6 @@ class QuestsFragment : Fragment() {
     }
 
     private fun updateList() {
-        print("Updated list!")
+        print("Updated list!") // TODO: Add fetch treasures from the server here
     }
 }

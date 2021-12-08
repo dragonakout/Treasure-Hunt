@@ -5,7 +5,7 @@ data class Treasure(
     val size: String,
     val adjective: String,
     val name: String,
-    val lattitude: Double,
+    val latitude: Double,
     val longitude: Double,
     val estimated_value: Int,
     val actual_value: Double,

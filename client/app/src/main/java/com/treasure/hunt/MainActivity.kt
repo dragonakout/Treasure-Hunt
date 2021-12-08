@@ -22,6 +22,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.treasure.hunt.data.Treasure
 import com.treasure.hunt.databinding.ActivityMainBinding
+import java.util.*
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
@@ -34,20 +35,16 @@ class MainActivity : AppCompatActivity() {
      - Muhazdinata
      */
     private lateinit var binding: ActivityMainBinding
-    lateinit var geofencingClient: GeofencingClient
 
-    val treasures by lazy { createTreasures() }
-    private val geofencePendingIntent: PendingIntent by lazy {
-        val intent = Intent(this, GeofenceBroadcastReceiver::class.java)
-        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when calling
-        // addGeofences() and removeGeofences().
-        PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-    }
+    lateinit var treasures : MutableList<Treasure>
+    lateinit var collectedTreasures : MutableList<Treasure>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestLocationPermission()
-        initializeGeofences()
+        treasures = createTreasures()
+        collectedTreasures = mutableListOf()
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -59,11 +56,6 @@ class MainActivity : AppCompatActivity() {
                 R.id.navigation_booty_list, R.id.navigation_treasure_map, R.id.navigation_aquired_booties))
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        geofencingClient.removeGeofences(geofencePendingIntent)
     }
 
     private fun requestLocationPermission() {
@@ -91,25 +83,18 @@ class MainActivity : AppCompatActivity() {
             Manifest.permission.ACCESS_COARSE_LOCATION))
     }
 
-    fun initializeGeofences() {
-        // if location permission is refused, do not initialize geofences
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED) { return }
-
-        geofencingClient = LocationServices.getGeofencingClient(this)
-        val geofences = createGeofencesFromTreasures(treasures)
-        geofencingClient.addGeofences(getGeofencingRequest(geofences), geofencePendingIntent)?.run {
-            addOnSuccessListener {
-                Log.i("Geofences","Geofences successfully added.")
-            }
-            addOnFailureListener {
-                Log.e("Geofences","Geofences unable to be added.")
-            }
-        }
+    fun collectTreasure(treasure: Treasure) {
+        treasures.remove(treasure)
+        collectedTreasures.add(treasure)
+        val notifTitle = "Butin récupéré !"
+        val notifShort = "Vous avez collecté le ${treasure.size.lowercase(Locale.getDefault())} ${treasure.name} ${treasure.adjective}!"
+        val notifDesc = "En collectant le ${treasure.size.lowercase(Locale.getDefault())} ${treasure.name} ${treasure.adjective}, vous avez obtenu ${treasure.actual_value.toInt()} pièces"
+        Utils.createNotification(this, notifTitle, notifShort, notifDesc, treasure.id )
     }
 
-    fun createTreasures() : List<Treasure>{
+    fun createTreasures() : MutableList<Treasure>{
         val list : MutableList<Treasure> = mutableListOf()
-        for(i in 0..9) {
+        for(i in 0..2) {
             val booty_size = POSSIBLE_BOOTY_SIZE[Random.Default.nextInt(0,POSSIBLE_BOOTY_SIZE.size)]
             val booty_name = POSSIBLE_BOOTY_NAME[Random.Default.nextInt(0,POSSIBLE_BOOTY_NAME.size)]
             val booty_adj = POSSIBLE_BOOTY_ADJECTIVE[Random.Default.nextInt(0,POSSIBLE_BOOTY_ADJECTIVE.size)]
@@ -123,36 +108,16 @@ class MainActivity : AppCompatActivity() {
         return list
     }
 
-    fun createGeofencesFromTreasures(treasures: List<Treasure> ) : List<Geofence>  {
-        val geofences : MutableList<Geofence> =  mutableListOf()
-        for(treasure in treasures) {
-            geofences.add(
-                Geofence.Builder()
-                    .setRequestId(treasure.id.toString())
-                    .setCircularRegion(treasure.longitude, treasure.lattitude, 500f)
-                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
-                    .setExpirationDuration(Geofence.NEVER_EXPIRE) // 86400000ms for 24h of duration
-                    .build()
-            )
-        }
-        return geofences
-    }
-
-    private fun getGeofencingRequest(geofences: List<Geofence> ): GeofencingRequest {
-        return GeofencingRequest.Builder().apply {
-            setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_DWELL)
-            addGeofences(geofences)
-        }.build()
-    }
-
     companion object {
         val POSSIBLE_BOOTY_SIZE = listOf("Gigantesque", "Immense", "Gros", "Abondant", "Grand", "Maigre", "Petit", "Massif")
         val POSSIBLE_BOOTY_NAME = listOf("trésor", "héritage", "magot", "butin")
         val POSSIBLE_BOOTY_ADJECTIVE = listOf("maudit", "mythique", "fantastique", "légendaire", "épique", "glorieux", "oublié", "prisé", "sanglant", "royal", "scintillant", "inimaginable")
 
-        val MINIMUM_LATTITUDE = 45.37167696186306
-        val MAXIMUM_LATTITUDE = 45.429208924836395
-        val MINIMUM_LONGITIDE = -71.96296752784556
-        val MAXIMUM_LONGITIDE = -71.86304785226521
+        val test_MINIMUM_LATTITUDE = 45.38457840343907
+        val test_MINIMUM_LONGITIDE = -71.90472273049694
+        val MINIMUM_LATTITUDE = 45.3755851874 //45.37167696186306
+        val MAXIMUM_LATTITUDE = 45.3935716195 //45.429208924836395
+        val MINIMUM_LONGITIDE = -71.9137159465 //-71.96296752784556
+        val MAXIMUM_LONGITIDE = -71.8957295144 //-71.86304785226521
     }
 }
