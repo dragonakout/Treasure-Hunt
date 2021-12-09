@@ -29,7 +29,7 @@ class BootyRecyclerViewAdapter(context: Context, private var treasures: MutableL
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val treasure: Treasure = treasures[position]
-        holder.treasureNameView.text = "${treasure.size} ${treasure.name} ${treasure.adjective}"
+        holder.treasureNameView.text = "${treasure.name}"
         holder.estimatedValueView.text = "Valeur: ${Utils.formatIntString(treasure.actual_value.toInt())} "
     }
 

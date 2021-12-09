@@ -8,6 +8,7 @@ import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -18,6 +19,7 @@ import com.treasure.hunt.databinding.ActivityMainBinding
 import java.util.*
 import kotlin.random.Random
 import com.treasure.hunt.http.QuestBroadcastReceiver
+import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
 
@@ -91,8 +93,8 @@ class MainActivity : AppCompatActivity() {
         Utils.writeToSharedPrefs("total_booty",totalBootyString,this)
 
         val notifTitle = "Butin récupéré !"
-        val notifShort = "Vous avez collecté le ${treasure.size.lowercase(Locale.getDefault())} ${treasure.name} ${treasure.adjective}!"
-        val notifDesc = "En collectant le ${treasure.size.lowercase(Locale.getDefault())} ${treasure.name} ${treasure.adjective}, vous avez obtenu ${treasure.actual_value.toInt()} pièces"
+        val notifShort = "Vous avez collecté le ${treasure.name.lowercase(Locale.getDefault())} !"
+        val notifDesc = "En collectant le ${treasure.name.lowercase(Locale.getDefault())}, vous avez obtenu ${treasure.actual_value.toInt()} pièces"
         Utils.createNotification(this, notifTitle, notifShort, notifDesc, treasure.id )
     }
 
@@ -106,7 +108,7 @@ class MainActivity : AppCompatActivity() {
             val booty_value_mul = 1 + (Random.Default.nextInt(1,10) / 10.0)
             val booty_lat = MINIMUM_LATTITUDE + Random.Default.nextFloat() * (MAXIMUM_LATTITUDE - MINIMUM_LATTITUDE)
             val booty_lon = MINIMUM_LONGITIDE + Random.Default.nextFloat() * (MAXIMUM_LONGITIDE - MINIMUM_LONGITIDE)
-            val treasure = Treasure(i, booty_size, booty_adj, booty_name, booty_lat, booty_lon, booty_value, booty_value * booty_value_mul,"1h")
+            val treasure = Treasure(i, "$booty_size $booty_name $booty_adj" , booty_value, booty_value * booty_value_mul, booty_lat, booty_lon,"-1")
             list.add(treasure)
         }
         return list
