@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.treasure.hunt.MainActivity
 import androidx.recyclerview.widget.RecyclerView
@@ -23,6 +22,7 @@ class QuestsFragment : Fragment() {
 
     lateinit var recyclerViewAdapter: QuestRecyclerViewAdapter
     private var _binding: FragmentQuestsBinding? = null
+    private lateinit var recyclerView: RecyclerView
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -41,16 +41,23 @@ class QuestsFragment : Fragment() {
         _binding = FragmentQuestsBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val recyclerView = binding.questsList
+        recyclerView = binding.questsList
         val refreshLayout = binding.swiperefresh
         refreshLayout.setOnRefreshListener {
             updateList()
             refreshLayout.isRefreshing = false
         }
         recyclerView.layoutManager = LinearLayoutManager(activity as Context);
-        recyclerViewAdapter = QuestRecyclerViewAdapter(activity as Context, mutableListOf())
+        recyclerViewAdapter = QuestRecyclerViewAdapter(activity as Context, mutableListOf(), ::onLongClickCallback)
         recyclerView.adapter = recyclerViewAdapter
         return root
+    }
+
+    private fun onLongClickCallback(treasure: Treasure) {
+        val treasures = (activity as MainActivity).treasures
+        val index = treasures.indexOf(treasure)
+        treasures.remove(treasure)
+        recyclerView.adapter?.notifyItemRemoved(index)
     }
 
     override fun onDestroyView() {
@@ -64,6 +71,6 @@ class QuestsFragment : Fragment() {
     }
 
     private fun updateList() {
-        print("Updated list!")
+        print("Updated list!") // TODO: Add fetch treasures from the server here
     }
 }

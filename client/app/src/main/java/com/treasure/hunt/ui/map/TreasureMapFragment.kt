@@ -123,6 +123,7 @@ class TreasureMapFragment : Fragment(), OnMapReadyCallback, LocationListener {
         currentPositionMarker = map?.addMarker(
             MarkerOptions()
                 .position(LatLng(lastlocationCoords!!.latitude, lastlocationCoords!!.longitude))
+                .icon(BitmapDescriptorFactory.fromResource(R.raw.img_maps_marker))
         )
         if (activity != null) {
             Utils.writeToSharedPrefs("lastLocationLatitude", location.latitude.toFloat(), activity)

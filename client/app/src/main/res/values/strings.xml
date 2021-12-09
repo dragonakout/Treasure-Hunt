@@ -4,4 +4,6 @@
     <string name="title_map">Carte</string>
     <string name="title_aquired">Butin</string>
     <string name="maps_key">AIzaSyCBYyNS6fxp36whSlI-mZJJ1uHUaPEps_g</string>
+    <string name="ok">Confirmer</string>
+    <string name="cancel">Annuler</string>
 </resources>
