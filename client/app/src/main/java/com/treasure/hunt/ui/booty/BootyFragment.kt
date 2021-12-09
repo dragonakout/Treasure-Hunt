@@ -1,39 +1,43 @@
 package com.treasure.hunt.ui.booty
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.treasure.hunt.MainActivity
+import com.treasure.hunt.Utils
 import com.treasure.hunt.databinding.FragmentBootyBinding
 
 class BootyFragment : Fragment() {
 
-    private lateinit var bootyViewModel: BootyViewModel
+
     private var _binding: FragmentBootyBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
-        bootyViewModel =
-                ViewModelProvider(this).get(BootyViewModel::class.java)
 
         _binding = FragmentBootyBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textNotifications
-        bootyViewModel.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
+        val bootyValueTextView: TextView = binding.bootyTotalValue
+        var totalBooty = Utils.readStringFromSharedPrefs("total_booty",activity)
+        if (totalBooty.isNullOrBlank()) totalBooty = "0"
+
+        bootyValueTextView.text = "Butin total : $totalBooty "
+
+        val recyclerView = binding.bootyList
+        recyclerView.layoutManager = LinearLayoutManager(activity as Context);
+        val adapter = BootyRecyclerViewAdapter(activity as Context, (activity as MainActivity).collectedTreasures )
+        recyclerView.adapter = adapter
         return root
     }
 

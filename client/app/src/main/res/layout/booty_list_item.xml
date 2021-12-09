@@ -6,13 +6,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?selectableItemBackground"
+    android:paddingBottom="10dp"
+    android:paddingStart="10dp"
+    android:paddingEnd="10dp"
     >
 
     <View
         android:id="@+id/itemDividerLine"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@android:color/darker_gray"/>
@@ -21,34 +24,32 @@
         android:id="@+id/treasureNameTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text='Gigantesque fortune maudite'
+        android:text='Gigantesque butin maudit'
+        android:layout_marginTop="10dp"
         android:textSize="20sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/treasureIconImageView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/treasureIconImageView"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/treasureIconImageView"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:src="@drawable/ic_booty"
-        app:layout_constraintStart_toStartOf="parent"
-        app:tint="?attr/colorOnSecondary"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/estimatedValueTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text='Trésor estimé: 50 000 '
+        android:text='Valeur: 50 000 '
         android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="@+id/treasureNameTextView"
         app:layout_constraintStart_toStartOf="@+id/treasureNameTextView"
         app:layout_constraintTop_toBottomOf="@+id/treasureNameTextView" />
+
+    <TextView
+        android:id="@+id/collectDateTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text='Collecté le 08/12/2021 '
+        android:textSize="18dp"
+        app:layout_constraintTop_toBottomOf="@+id/treasureNameTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
 
     <ImageView
         android:layout_width="20dp"
@@ -58,17 +59,5 @@
         app:layout_constraintStart_toEndOf="@id/estimatedValueTextView"
         app:layout_constraintTop_toTopOf="@id/estimatedValueTextView" />
 
-    <TextView
-        android:id="@+id/questLengthTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="Durée de la quête: 1h "
-        android:textSize="24dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/treasureIconImageView"
-        android:layout_marginBottom="10dp"
-        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

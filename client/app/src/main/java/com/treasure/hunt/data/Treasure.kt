@@ -12,8 +12,8 @@ data class Treasure(
     val name: String,
     val estimated_value: Int,
     val actual_value: Double,
-    val latitude: Float,
-    val longitude: Float,
+    val latitude: Double,
+    val longitude: Double,
     val collected_timestamp: String,
 ) {
     constructor(json: JSONObject) : this(
@@ -21,8 +21,8 @@ data class Treasure(
         json.getString("name"),
         json.getInt("estimated_value"),
         json.getDouble("actual_value"),
-        json.getDouble("latitude").toFloat(),
-        json.getDouble("longitude").toFloat(),
+        json.getDouble("latitude"),
+        json.getDouble("longitude"),
         json.getString("collected_timestamp")
     )
 }

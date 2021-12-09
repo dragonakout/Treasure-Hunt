@@ -6,8 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.os.bundleOf
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.treasure.hunt.R
+import com.treasure.hunt.Utils
 import com.treasure.hunt.data.Treasure
 
 
@@ -30,10 +33,12 @@ class QuestRecyclerViewAdapter(val context: Context, var data: MutableList<Treas
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val treasure: Treasure = data[position]
         holder.treasureNameView.text = "${treasure.name}"
-        holder.estimatedValueView.text = "Trésor estimé: ${treasure.estimated_value} "
+        holder.estimatedValueView.text = "Trésor estimé: ${Utils.formatIntString(treasure.estimated_value)} "
         holder.questLengthView.text = "Durée de la quête: 1h" //TODO Calculate distance in meters, show it according to user pref
         holder.questItemRootView.setOnClickListener {
+            val bundle = bundleOf(Pair("lattitude", treasure.latitude.toFloat()), Pair("longitude", treasure.longitude.toFloat()))
             Toast.makeText(context,"Emplacement: ${treasure.latitude}, ${treasure.longitude}", Toast.LENGTH_SHORT).show()
+            holder.itemView.findNavController().navigate(R.id.action_navigation_booty_list_to_navigation_treasure_map, bundle)
         }
     }
 
