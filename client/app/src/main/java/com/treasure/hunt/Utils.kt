@@ -1,9 +1,11 @@
 package com.treasure.hunt
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.DialogInterface
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -34,6 +36,31 @@ object Utils {
 
     fun angleToMeters(angle: Double) : Double {
         return (( 2 * PI * EARTH_RADIUS * angle) / 360)
+    }
+
+    // Based on the android docs for dialogs
+    fun createConfirmationDialog(activity: Activity?, titre:String, message: String, okCallback: () -> (Unit)) {
+        val alertDialog: AlertDialog? = activity?.let {
+            val builder = AlertDialog.Builder(it)
+            builder.apply {
+                setPositiveButton(R.string.ok,
+                    DialogInterface.OnClickListener { dialog, id ->
+                        // User clicked OK button
+                        okCallback()
+                    })
+                setNegativeButton(R.string.cancel,
+                    DialogInterface.OnClickListener { dialog, id ->
+                        // User cancelled the dialog
+                    })
+            }
+            // Set other dialog properties
+            builder.setMessage(message)
+                .setTitle(titre)
+
+            // Create the AlertDialog
+            builder.create()
+        }
+        alertDialog?.show()
     }
 
     // Based on the android docs for notifications

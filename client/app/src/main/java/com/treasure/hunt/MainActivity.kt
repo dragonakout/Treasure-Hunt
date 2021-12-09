@@ -34,6 +34,9 @@ class MainActivity : AppCompatActivity() {
      - bqlqn
      - Freepik
      - Muhazdinata
+     - juicy_fish
+     - Google Material Design
+     - Google Maps
      */
     private lateinit var binding: ActivityMainBinding
 
@@ -108,7 +111,7 @@ class MainActivity : AppCompatActivity() {
             val booty_value_mul = 1 + (Random.Default.nextInt(1,10) / 10.0)
             val booty_lat = MINIMUM_LATTITUDE + Random.Default.nextFloat() * (MAXIMUM_LATTITUDE - MINIMUM_LATTITUDE)
             val booty_lon = MINIMUM_LONGITIDE + Random.Default.nextFloat() * (MAXIMUM_LONGITIDE - MINIMUM_LONGITIDE)
-            val treasure = Treasure(i, booty_size, booty_adj, booty_name, booty_lat, booty_lon, booty_value, booty_value * booty_value_mul,"1h")
+            val treasure = Treasure(i, booty_size, booty_adj, booty_name, booty_lat, booty_lon, booty_value, booty_value * booty_value_mul,"1h", "")
             list.add(treasure)
         }
         return list

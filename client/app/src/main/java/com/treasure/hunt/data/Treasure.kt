@@ -10,4 +10,5 @@ data class Treasure(
     val estimated_value: Int,
     val actual_value: Double,
     val quest_length: String,
+    var collected_timestamp: String
 )

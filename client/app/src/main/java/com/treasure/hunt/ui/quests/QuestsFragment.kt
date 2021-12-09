@@ -5,21 +5,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.graphics.luminance
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.treasure.hunt.MainActivity
 import com.treasure.hunt.data.Treasure
 import com.treasure.hunt.databinding.FragmentQuestsBinding
-import kotlin.random.Random
 
 class QuestsFragment : Fragment() {
 
 
     private var _binding: FragmentQuestsBinding? = null
+    private lateinit var recyclerView: RecyclerView
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -35,16 +32,23 @@ class QuestsFragment : Fragment() {
         _binding = FragmentQuestsBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val recyclerView = binding.questsList
+        recyclerView = binding.questsList
         val refreshLayout = binding.swiperefresh
         refreshLayout.setOnRefreshListener {
             updateList()
             refreshLayout.isRefreshing = false
         }
         recyclerView.layoutManager = LinearLayoutManager(activity as Context);
-        val adapter = QuestRecyclerViewAdapter(activity as Context, (activity as MainActivity).treasures )
+        val adapter = QuestRecyclerViewAdapter(activity as Context, (activity as MainActivity).treasures, ::onLongClickCallback)
         recyclerView.adapter = adapter
         return root
+    }
+
+    private fun onLongClickCallback(treasure: Treasure) {
+        val treasures = (activity as MainActivity).treasures
+        val index = treasures.indexOf(treasure)
+        treasures.remove(treasure)
+        recyclerView.adapter?.notifyItemRemoved(index)
     }
 
     override fun onDestroyView() {

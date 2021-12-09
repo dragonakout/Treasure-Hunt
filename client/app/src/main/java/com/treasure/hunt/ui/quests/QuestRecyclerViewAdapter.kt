@@ -1,5 +1,6 @@
 package com.treasure.hunt.ui.quests
 
+import android.app.Activity
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -8,12 +9,13 @@ import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.treasure.hunt.MainActivity
 import com.treasure.hunt.R
 import com.treasure.hunt.Utils
 import com.treasure.hunt.data.Treasure
 
 
-class QuestRecyclerViewAdapter(val context: Context, private var data: List<Treasure>) : RecyclerView.Adapter<QuestRecyclerViewAdapter.ViewHolder>() {
+class QuestRecyclerViewAdapter(val context: Context, private var data: List<Treasure>, val callback: (treasure: Treasure) -> (Unit)) : RecyclerView.Adapter<QuestRecyclerViewAdapter.ViewHolder>() {
 
     var inflater: LayoutInflater = LayoutInflater.from(context)
 
@@ -37,6 +39,13 @@ class QuestRecyclerViewAdapter(val context: Context, private var data: List<Trea
         holder.questItemRootView.setOnClickListener {
             val bundle = bundleOf(Pair("lattitude", treasure.latitude.toFloat()), Pair("longitude", treasure.longitude.toFloat()))
             holder.itemView.findNavController().navigate(R.id.action_navigation_booty_list_to_navigation_treasure_map, bundle)
+        }
+        holder.questItemRootView.setOnLongClickListener {
+            fun dialogCallback() {
+                callback(treasure)
+            }
+            Utils.createConfirmationDialog(context as Activity?, "Abandon de la quête", "Voulez-vous vraiment abandonner la quête?", ::dialogCallback)
+            true
         }
     }
 
