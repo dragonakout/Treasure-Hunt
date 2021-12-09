@@ -31,6 +31,7 @@ class BootyRecyclerViewAdapter(context: Context, private var treasures: MutableL
         val treasure: Treasure = treasures[position]
         holder.treasureNameView.text = "${treasure.name}"
         holder.estimatedValueView.text = "Valeur: ${Utils.formatIntString(treasure.actual_value.toInt())} "
+        holder.collectDateTextView.text = "Collecté le ${treasure.collected_timestamp}"
     }
 
 
@@ -38,5 +39,6 @@ class BootyRecyclerViewAdapter(context: Context, private var treasures: MutableL
 
         var treasureNameView : TextView = itemView.findViewById(R.id.treasureNameTextView)
         var estimatedValueView : TextView = itemView.findViewById(R.id.estimatedValueTextView)
+        var collectDateTextView : TextView = itemView.findViewById(R.id.collectDateTextView)
     }
 }

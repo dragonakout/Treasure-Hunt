@@ -7,6 +7,7 @@ class Tresor {
     this.latitude = latitude;
     this.longitude = longitude;
     this.timestampCollecte = "-1"
+    this.isNew = true
   }
 
 
@@ -19,7 +20,8 @@ class Tresor {
         'quest_length': this.duree,
         'latitude': this.latitude,
         'longitude': this.longitude,
-        'collected_timestamp': this.timestampCollecte
+        'collected_timestamp': this.timestampCollecte,
+        'is_new': this.isNew
       }
   }
 }

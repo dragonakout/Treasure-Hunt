@@ -1,19 +1,22 @@
+ Preferences = require('./Preferences.js');
+
 class User {
-  constructor (nom, photoProfil, id) {
+  constructor (id, photoProfil) {
     this.id = id;
-    this.nom = nom;
-    this.tresorsCompletes = [];
-    this.tresorsRestants = [];
+    this.quetes = [];
+    this.tresors = [];
+    this.prefs = new Preferences();
     this.photoProfil = photoProfil;
+    this.last_daily_quest_redeem = 0
   }
 
   toJSON () {
     return {
       'id': this.id,
-      'nom': this.nom,
-      'tresorsCompletes': this.tresorsCompletes,
-      'tresorsRestants': this.tresorsRestants,
-      'this.photoProfil': this.photoProfil
+      'quests': this.quetes,
+      'treasures': this.tresors,
+      'prefs': this.prefs,
+      'photoProfil': this.photoProfil,
     };
   }
 }

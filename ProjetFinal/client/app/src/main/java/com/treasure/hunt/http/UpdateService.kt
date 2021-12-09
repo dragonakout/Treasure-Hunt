@@ -5,14 +5,21 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.treasure.hunt.Utils
 import com.treasure.hunt.data.Treasure
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.Serializable
+import java.lang.Exception
 
 class UpdateService : Service(), Serializable {
     private val binder: IBinder = UpdateManuallyBinder()
     private var httpGetter: HttpGetter? = null
-    private var thread: Thread? = null
     private var arrayTreasures: ArrayList<Treasure>? = null
+    private var requestString: String? = null
+    private var queryParams: MutableMap<String, String>? = null
+
 
     inner class UpdateManuallyBinder : Binder() {
         val service: UpdateService
@@ -21,21 +28,6 @@ class UpdateService : Service(), Serializable {
 
     override fun onBind(intent: Intent): IBinder? {
         return binder
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        arrayTreasures = ArrayList()
-        httpGetter = HttpGetter(urlString)
-        thread = Thread(httpGetter)
-        try {
-            thread!!.start()
-            thread!!.join()
-            arrayTreasures = httpGetter!!.listePartiesFromJSON
-            startIntentBroadcast()
-        } catch (e: InterruptedException) {
-            e.printStackTrace()
-        }
     }
 
     private fun startIntentBroadcast() {
@@ -47,14 +39,22 @@ class UpdateService : Service(), Serializable {
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        requestString = intent.getStringExtra("request_string")
+        try {
+            queryParams = mutableMapOf()
+            queryParams?.put("location_longitude", intent.getStringExtra("location_longitude")!!)
+            queryParams?.put("location_latitude", intent.getStringExtra("location_latitude")!!)
+            queryParams?.put("user_id", intent.getStringExtra("user_id")!!)
+        } catch (e: Exception) {
+            print(e.stackTrace)
+        }
+        httpGetter = HttpGetter(Utils.BASE_URL + requestString, queryParams)
+        arrayTreasures = ArrayList()
+        GlobalScope.launch {
+            httpGetter?.run();
+            arrayTreasures = httpGetter!!.listePartiesFromJSON ;
+            startIntentBroadcast() }
+
         return super.onStartCommand(intent, flags, startId)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
-    companion object {
-        private const val urlString = "http://10.0.2.2:3000/treasures"
     }
 }

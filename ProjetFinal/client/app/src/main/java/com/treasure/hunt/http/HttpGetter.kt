@@ -1,26 +1,54 @@
 package com.treasure.hunt.http
 
+import android.net.Uri
 import com.treasure.hunt.data.Treasure
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONException
 import java.io.BufferedReader
+import java.io.BufferedWriter
 import java.io.InputStreamReader
+import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 
-class HttpGetter(private val urlString: String) : Runnable {
+class HttpGetter(private val urlString: String, val queryParams: Map<String, String>?){
     private var jsonString = ""
-    override fun run() {
+    suspend fun run() = withContext(Dispatchers.IO) {
         try {
-            var urlConnection: HttpURLConnection? = null
+            var urlConnection: HttpURLConnection?
             val url = URL(urlString)
             urlConnection = url.openConnection() as HttpURLConnection
-            urlConnection.requestMethod = "GET"
-            urlConnection.readTimeout = 10000
+            urlConnection.requestMethod = "POST"
+            urlConnection.readTimeout = 15000
             urlConnection.connectTimeout = 15000
             urlConnection.doOutput = true
+            urlConnection.doInput = true
+
+
+//             params inspired from: https://stackoverflow.com/a/29053050/11725219
+            val builder = Uri.Builder()
+            if(queryParams != null) {
+                for (i in queryParams.keys) {
+                    builder.appendQueryParameter(i, queryParams[i])
+                }
+
+                val query = builder.build().encodedQuery
+                val os = urlConnection.outputStream
+                val writer = BufferedWriter(
+                    OutputStreamWriter(os, "UTF-8")
+                )
+                writer.write(query)
+                writer.flush()
+                writer.close()
+                os.close()
+            }
             urlConnection.connect()
-            val br = BufferedReader(InputStreamReader(url.openStream()))
+            urlConnection.responseCode
+
+            val br = BufferedReader(InputStreamReader(urlConnection.inputStream))
             val sb = StringBuilder()
             var line: String?
             while (br.readLine().also { line = it } != null) {

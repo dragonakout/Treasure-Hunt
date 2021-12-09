@@ -11,13 +11,16 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.getSystemService
 import com.google.android.gms.maps.model.LatLng
+import com.treasure.hunt.http.HttpPoster
 import java.lang.Math.PI
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-val EARTH_RADIUS = 6371000
 
 object Utils {
+
+    val EARTH_RADIUS = 6371000
+    val BASE_URL = "http://10.0.2.2:3000"
 
     // from https://stackoverflow.com/a/60337241/11725219
     fun formatIntString(int: Int) : String {
@@ -131,5 +134,27 @@ object Utils {
     fun readIntFromSharedPrefs(key: String, activity: Activity?) : Int? {
         val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return null
         return sharedPref.getInt(key, 0)
+    }
+
+    fun getUserId(activity: Activity?): String? {
+        val userId = readStringFromSharedPrefs("user_id", activity)
+        return if( userId == "" || userId == null) {
+            null
+        } else userId
+    }
+
+    fun post(url: String, params: Map<String, String>) {
+        val httpPoster = HttpPoster(
+            url
+            ,
+            params
+        )
+        val thread = Thread(httpPoster)
+        try {
+            thread.start()
+            thread.join()
+        } catch (e: InterruptedException) {
+            e.printStackTrace()
+        }
     }
 }

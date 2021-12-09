@@ -34,11 +34,11 @@ class TreasureMapFragment : Fragment(), OnMapReadyCallback, LocationListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        InitializeLocationManager()
         binding = FragmentMapBinding.inflate(inflater, container, false)
         mapView = binding?.root?.findViewById(R.id.map_view)
         mapView?.onCreate(savedInstanceState)
         mapView?.getMapAsync(this)
-        InitializeLocationManager()
         lastlocationCoords = getInitialLocation()
 
         return binding!!.root
@@ -63,8 +63,9 @@ class TreasureMapFragment : Fragment(), OnMapReadyCallback, LocationListener {
     override fun onMapReady(map: GoogleMap) {
         this.map = map
         currentPositionMarker?.remove()
-        currentPositionMarker = map?.addMarker(
+        currentPositionMarker = map.addMarker(
             MarkerOptions()
+                .icon(BitmapDescriptorFactory.fromResource(R.raw.img_maps_marker))
                 .position(LatLng(lastlocationCoords!!.latitude, lastlocationCoords!!.longitude))
         )
         var coords = getInitialLocation()
@@ -121,8 +122,8 @@ class TreasureMapFragment : Fragment(), OnMapReadyCallback, LocationListener {
         currentPositionMarker?.remove()
         currentPositionMarker = map?.addMarker(
             MarkerOptions()
-                .position(LatLng(lastlocationCoords!!.latitude, lastlocationCoords!!.longitude))
                 .icon(BitmapDescriptorFactory.fromResource(R.raw.img_maps_marker))
+                .position(LatLng(lastlocationCoords!!.latitude, lastlocationCoords!!.longitude))
         )
         if (activity != null) {
             Utils.writeToSharedPrefs("lastLocationLatitude", location.latitude.toFloat(), activity)

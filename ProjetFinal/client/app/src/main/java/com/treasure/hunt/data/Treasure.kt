@@ -14,8 +14,8 @@ data class Treasure(
     val actual_value: Double,
     val latitude: Double,
     val longitude: Double,
-    var collected_timestamp: String
-
+    var collected_timestamp: String,
+    val is_new: Boolean
 ) {
     constructor(json: JSONObject) : this(
         json.getInt("id"),
@@ -24,6 +24,7 @@ data class Treasure(
         json.getDouble("actual_value"),
         json.getDouble("latitude"),
         json.getDouble("longitude"),
-        json.getString("collected_timestamp")
+        json.getString("collected_timestamp"),
+        json.getBoolean("is_new")
     )
 }

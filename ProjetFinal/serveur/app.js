@@ -14,6 +14,5 @@ app.use(cookieParser());
 app.use('/', indexRouter);
 
 const generateur = require('./GenerateurTresor');
-generateur.genererTresor(10);
 
 module.exports = app;

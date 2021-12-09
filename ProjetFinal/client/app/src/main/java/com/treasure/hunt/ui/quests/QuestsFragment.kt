@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.treasure.hunt.MainActivity
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.treasure.hunt.Utils
 import com.treasure.hunt.data.Treasure
 import com.treasure.hunt.databinding.FragmentQuestsBinding
 import com.treasure.hunt.http.UpdateService
@@ -33,10 +34,6 @@ class QuestsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val activity: MainActivity? = this.activity as MainActivity?
-        val intent = Intent(activity, UpdateService::class.java)
-        activity?.startService(intent)
-
 
         _binding = FragmentQuestsBinding.inflate(inflater, container, false)
         val root: View = binding.root
@@ -48,16 +45,27 @@ class QuestsFragment : Fragment() {
             refreshLayout.isRefreshing = false
         }
         recyclerView.layoutManager = LinearLayoutManager(activity as Context);
-        recyclerViewAdapter = QuestRecyclerViewAdapter(activity as Context, mutableListOf(), ::onLongClickCallback)
+        recyclerViewAdapter = QuestRecyclerViewAdapter(activity as Context, (activity as MainActivity).treasures, ::onLongClickCallback)
         recyclerView.adapter = recyclerViewAdapter
         return root
     }
-
+    // TODO: Fix the item duplication
     private fun onLongClickCallback(treasure: Treasure) {
         val treasures = (activity as MainActivity).treasures
-        val index = treasures.indexOf(treasure)
+        recyclerViewAdapter.data = treasures
         treasures.remove(treasure)
-        recyclerView.adapter?.notifyItemRemoved(index)
+        recyclerViewAdapter.notifyDataSetChanged()
+        postRemovedTreasure(treasure)
+    }
+
+    private fun postRemovedTreasure(treasure: Treasure) {
+        val userId = Utils.getUserId(activity)!!
+        val params = mapOf(
+            Pair("treasure_id",treasure.id.toString()),
+            Pair("user_id", userId),
+        )
+        val url = Utils.BASE_URL + "/" + userId + "/dropquest"
+        Utils.post(url, params)
     }
 
     override fun onDestroyView() {
@@ -65,12 +73,7 @@ class QuestsFragment : Fragment() {
         _binding = null
     }
 
-    override fun onResume() {
-        super.onResume()
-        updateList()
-    }
-
     private fun updateList() {
-        print("Updated list!") // TODO: Add fetch treasures from the server here
+        (activity as MainActivity).updateData()
     }
 }

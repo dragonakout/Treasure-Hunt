@@ -1,10 +1,14 @@
 package com.treasure.hunt
 
-import android.content.IntentFilter
 import android.Manifest
+import android.app.AlertDialog
+import android.content.DialogInterface
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.widget.EditText
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -13,13 +17,15 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.treasure.hunt.data.Treasure
 import com.treasure.hunt.databinding.ActivityMainBinding
-import java.util.*
-import kotlin.random.Random
 import com.treasure.hunt.http.QuestBroadcastReceiver
+import com.treasure.hunt.http.UpdateService
+import java.util.*
 import kotlin.math.roundToInt
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -41,13 +47,18 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestLocationPermission()
-        treasures = createTreasures(3)
+        treasures = mutableListOf()
         collectedTreasures = mutableListOf()
 
+        if(Utils.getUserId(this).isNullOrBlank()) {
+            createIdAlert()
+        }
         val br = QuestBroadcastReceiver()
         br.ma = this
         val filter = IntentFilter(QuestBroadcastReceiver.AQUIRE_QUESTS)
         LocalBroadcastManager.getInstance(this).registerReceiver(br, filter)
+
+        updateData()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -90,43 +101,65 @@ class MainActivity : AppCompatActivity() {
 
     fun collectTreasure(treasure: Treasure) {
         treasures.remove(treasure)
+        treasure.collected_timestamp = getCurrentDate()
         collectedTreasures.add(treasure)
-
+        postCollectedTreasure(treasure)
         val totalBootyString = Utils.formatIntString(collectedTreasures.sumOf { t -> t.actual_value }.roundToInt())
         Utils.writeToSharedPrefs("total_booty",totalBootyString,this)
-
         val notifTitle = "Butin récupéré !"
         val notifShort = "Vous avez collecté le ${treasure.name.lowercase(Locale.getDefault())} !"
         val notifDesc = "En collectant le ${treasure.name.lowercase(Locale.getDefault())}, vous avez obtenu ${treasure.actual_value.toInt()} pièces"
         Utils.createNotification(this, notifTitle, notifShort, notifDesc, treasure.id )
     }
 
-    fun createTreasures(number: Int) : MutableList<Treasure>{
-        val list : MutableList<Treasure> = mutableListOf()
-        for(i in 0 until number) {
-            val booty_size = POSSIBLE_BOOTY_SIZE[Random.Default.nextInt(0,POSSIBLE_BOOTY_SIZE.size)]
-            val booty_name = POSSIBLE_BOOTY_NAME[Random.Default.nextInt(0,POSSIBLE_BOOTY_NAME.size)]
-            val booty_adj = POSSIBLE_BOOTY_ADJECTIVE[Random.Default.nextInt(0,POSSIBLE_BOOTY_ADJECTIVE.size)]
-            val booty_value = Random.Default.nextInt(5,20) * 1000
-            val booty_value_mul = 1 + (Random.Default.nextInt(1,10) / 10.0)
-            val booty_lat = MINIMUM_LATTITUDE + Random.Default.nextFloat() * (MAXIMUM_LATTITUDE - MINIMUM_LATTITUDE)
-            val booty_lon = MINIMUM_LONGITIDE + Random.Default.nextFloat() * (MAXIMUM_LONGITIDE - MINIMUM_LONGITIDE)
-            val treasure = Treasure(i, "$booty_size $booty_name $booty_adj" , booty_value, booty_value * booty_value_mul, booty_lat, booty_lon, "-1")
-            list.add(treasure)
-        }
-        return list
+    private fun postCollectedTreasure(treasure: Treasure) {
+        val userId = Utils.getUserId(this)!!
+        val params = mapOf(
+            Pair("treasure_id",treasure.id.toString()),
+            Pair("user_id", userId),
+            Pair("collected_timestamp",treasure.collected_timestamp),
+        )
+        val url = Utils.BASE_URL + "/$userId/treasure"
+        Utils.post(url, params)
     }
 
-    companion object {
-        val POSSIBLE_BOOTY_SIZE = listOf("Gigantesque", "Immense", "Gros", "Abondant", "Grand", "Maigre", "Petit", "Massif")
-        val POSSIBLE_BOOTY_NAME = listOf("trésor", "héritage", "magot", "butin")
-        val POSSIBLE_BOOTY_ADJECTIVE = listOf("maudit", "mythique", "fantastique", "légendaire", "épique", "glorieux", "oublié", "prisé", "sanglant", "royal", "scintillant", "inimaginable")
+// Copié depuis:
+// https://stackoverflow.com/questions/18799216/how-to-make-a-edittext-box-in-a-dialog
+    fun createIdAlert() {
+        val alert: AlertDialog.Builder = AlertDialog.Builder(this)
+        val edittext = EditText(this)
+        alert.setMessage("Veillez choisir votre nom de pirate: ")
+        alert.setTitle("Bienvenue dans Treasure Hunt")
 
-        val test_MINIMUM_LATTITUDE = 45.38457840343907
-        val test_MINIMUM_LONGITIDE = -71.90472273049694
-        val MINIMUM_LATTITUDE = 45.3755851874 //45.37167696186306
-        val MAXIMUM_LATTITUDE = 45.3935716195 //45.429208924836395
-        val MINIMUM_LONGITIDE = -71.9137159465 //-71.96296752784556
-        val MAXIMUM_LONGITIDE = -71.8957295144 //-71.86304785226521
+        alert.setView(edittext)
+
+        alert.setPositiveButton("Confirmer",
+            DialogInterface.OnClickListener { dialog, whichButton -> // What ever you want to do with the value
+                val writtenUserId = edittext.text.toString()
+                Utils.writeToSharedPrefs("user_id", writtenUserId, this)
+                val params = mapOf( Pair("user_id",writtenUserId))
+                Utils.post(Utils.BASE_URL + "/user", params)
+            })
+
+        alert.show()
+    }
+
+    private fun getCurrentDate() : String {
+        val calendar = Calendar.getInstance()
+        return "${calendar.get(Calendar.DAY_OF_MONTH)}/${calendar.get(Calendar.MONTH)}/${calendar.get(Calendar.YEAR)}"
+    }
+
+    fun updateData() {
+        val intent = Intent(this, UpdateService::class.java)
+        intent.putExtra("request_string","/quests")
+        intent.putExtra("user_id","${Utils.getUserId(this)}")
+
+        val long = Utils.readFloatFromSharedPrefs("lastLocationLongitude", this)
+        val lat = Utils.readFloatFromSharedPrefs("lastLocationLatitude", this)
+        if (!(lat == null || long == null || (lat == 0f && long == 0f))) {
+            intent.putExtra("location_longitude", long.toString())
+            intent.putExtra("location_latitude", lat.toString())
+        }
+        this.startService(intent)
     }
 }
