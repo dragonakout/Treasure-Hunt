@@ -23,9 +23,13 @@ router.post('/quests', function (req, res, next) {
   const location_latitude = req.body.location_latitude
   if(gen.userSet.get(user_id) != undefined) {
     // If it has been more than 24hours since last time having new quests, generate new quests
-    if((new Date).getTime() - gen.userSet.get(user_id).last_daily_quest_redeem > 86400000) {
+    
+    //if((new Date).getTime() - gen.userSet.get(user_id).last_daily_quest_redeem > 86400000) {
+      gen.userSet.get(user_id).quetes.map (function(t) { 
+        t.isNew = false
+      })
       gen.genererTresor(gen.userSet.get(user_id).prefs.nb_daily_quests, gen.userSet.get(user_id))
-    }
+    //}
     res.send(gen.userSet.get(user_id).quetes);
   } else {
     if(user_id != undefined) {

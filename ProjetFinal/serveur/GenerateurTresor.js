@@ -21,7 +21,7 @@ function genererTresor(nb, user) {
     let lat = MINIMUM_LATTITUDE + Math.random() * (MAXIMUM_LATTITUDE - MINIMUM_LATTITUDE)
     let long = MINIMUM_LONGITIDE + Math.random() * (MAXIMUM_LONGITIDE - MINIMUM_LONGITIDE)
   
-    user.quetes.push(new Tresor(i, nom, montantEstime, montantActuel, lat, long));
+    user.quetes.unshift(new Tresor(i, nom, montantEstime, montantActuel, lat, long));
   }
   user.last_daily_quest_redeem = new Date().getTime()
 }

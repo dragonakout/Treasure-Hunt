@@ -5,6 +5,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.os.bundleOf
@@ -49,6 +50,7 @@ class QuestRecyclerViewAdapter(val context: Context, var data: MutableList<Treas
             Utils.createConfirmationDialog(context as Activity?, "Abandon de la quête", "Voulez-vous vraiment abandonner la quête?", ::dialogCallback)
             true
         }
+        holder.isNewIcon.visibility = if(treasure.is_new) View.VISIBLE else View.GONE
     }
 
 
@@ -58,6 +60,7 @@ class QuestRecyclerViewAdapter(val context: Context, var data: MutableList<Treas
         var estimatedValueView : TextView = itemView.findViewById(R.id.estimatedValueTextView)
         var questLengthView : TextView = itemView.findViewById(R.id.questLengthTextView)
         var questItemRootView : View = itemView.findViewById(R.id.quest_item_root)
+        var isNewIcon : ImageView = itemView.findViewById(R.id.isNewIcon)
     }
 }
 
