@@ -23,6 +23,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.treasure.hunt.data.Treasure
 import com.treasure.hunt.databinding.ActivityMainBinding
 import java.util.*
+import kotlin.math.roundToInt
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
@@ -42,7 +43,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestLocationPermission()
-        treasures = createTreasures()
+        treasures = createTreasures(3)
         collectedTreasures = mutableListOf()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -77,24 +78,29 @@ class MainActivity : AppCompatActivity() {
             ) == PackageManager.PERMISSION_GRANTED) {
             return
         }
-
-        locationPermissionRequest.launch(arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION))
+        val permissions = mutableListOf( Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+        }
+        locationPermissionRequest.launch(permissions.toTypedArray())
     }
 
     fun collectTreasure(treasure: Treasure) {
         treasures.remove(treasure)
         collectedTreasures.add(treasure)
+
+        val totalBootyString = Utils.formatIntString(collectedTreasures.sumOf { t -> t.actual_value }.roundToInt())
+        Utils.writeToSharedPrefs("total_booty",totalBootyString,this)
+
         val notifTitle = "Butin récupéré !"
         val notifShort = "Vous avez collecté le ${treasure.size.lowercase(Locale.getDefault())} ${treasure.name} ${treasure.adjective}!"
         val notifDesc = "En collectant le ${treasure.size.lowercase(Locale.getDefault())} ${treasure.name} ${treasure.adjective}, vous avez obtenu ${treasure.actual_value.toInt()} pièces"
         Utils.createNotification(this, notifTitle, notifShort, notifDesc, treasure.id )
     }
 
-    fun createTreasures() : MutableList<Treasure>{
+    fun createTreasures(number: Int) : MutableList<Treasure>{
         val list : MutableList<Treasure> = mutableListOf()
-        for(i in 0..2) {
+        for(i in 0 until number) {
             val booty_size = POSSIBLE_BOOTY_SIZE[Random.Default.nextInt(0,POSSIBLE_BOOTY_SIZE.size)]
             val booty_name = POSSIBLE_BOOTY_NAME[Random.Default.nextInt(0,POSSIBLE_BOOTY_NAME.size)]
             val booty_adj = POSSIBLE_BOOTY_ADJECTIVE[Random.Default.nextInt(0,POSSIBLE_BOOTY_ADJECTIVE.size)]

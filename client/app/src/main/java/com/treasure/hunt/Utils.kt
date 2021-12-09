@@ -16,17 +16,26 @@ import kotlin.math.sqrt
 val EARTH_RADIUS = 6371000
 
 object Utils {
+
+    // from https://stackoverflow.com/a/60337241/11725219
+    fun formatIntString(int: Int) : String {
+        return StringBuilder(int.toString().reversed()).replace("...".toRegex(), "$0 ").reversed()
+    }
+
     fun distanceCoordsToM(coords1: LatLng, coords2: LatLng): Double {
         val lat = coords1.latitude - coords2.latitude
         val long = coords1.longitude - coords2.longitude
-        val lat_in_meters = 2 * PI * EARTH_RADIUS * lat / 360
-        val long_in_meters = 2 * PI * EARTH_RADIUS * long / 360
-        return sqrt(lat_in_meters.pow(2) + long_in_meters.pow(2)) // Enclidian distance
+        return sqrt(angleToMeters(lat).pow(2) + angleToMeters(long).pow(2)) // Enclidian distance
     }
 
     fun metersToAngle(meters: Int) : Double {
         return (meters * 360) /( 2 * PI * EARTH_RADIUS)
     }
+
+    fun angleToMeters(angle: Double) : Double {
+        return (( 2 * PI * EARTH_RADIUS * angle) / 360)
+    }
+
     // Based on the android docs for notifications
     fun createNotification(context: Context, title: String, short_content:String,  content: String, notifId: Int) {
         // Create the NotificationChannel, but only on API 26+ because
@@ -52,7 +61,6 @@ object Utils {
             .bigText(content))
 
         with(NotificationManagerCompat.from(context)) {
-            // notificationId is a unique int for each notification that you must define
             notify(notifId, builder.build())
         }
     }

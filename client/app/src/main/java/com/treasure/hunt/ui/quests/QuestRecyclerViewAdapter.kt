@@ -9,6 +9,7 @@ import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.treasure.hunt.R
+import com.treasure.hunt.Utils
 import com.treasure.hunt.data.Treasure
 
 
@@ -31,7 +32,7 @@ class QuestRecyclerViewAdapter(val context: Context, private var data: List<Trea
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val treasure: Treasure = data[position]
         holder.treasureNameView.text = "${treasure.size} ${treasure.name} ${treasure.adjective}"
-        holder.estimatedValueView.text = "Trésor estimé: ${treasure.estimated_value} "
+        holder.estimatedValueView.text = "Trésor estimé: ${Utils.formatIntString(treasure.estimated_value)} "
         holder.questLengthView.text = "Durée de la quête: ${treasure.quest_length}"
         holder.questItemRootView.setOnClickListener {
             val bundle = bundleOf(Pair("lattitude", treasure.latitude.toFloat()), Pair("longitude", treasure.longitude.toFloat()))
