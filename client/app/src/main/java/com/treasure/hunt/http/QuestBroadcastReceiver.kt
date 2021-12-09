@@ -16,6 +16,8 @@ class QuestBroadcastReceiver : BroadcastReceiver(), Serializable {
 
     override fun onReceive(context: Context, intent: Intent) {
         val bundle = intent.extras
+        ma?.treasures = bundle!!.getSerializable("arrayTreasures")  as MutableList<Treasure>
+
         val navHostFragment = ma?.supportFragmentManager
             ?.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
         val f = navHostFragment.childFragmentManager.fragments[0]

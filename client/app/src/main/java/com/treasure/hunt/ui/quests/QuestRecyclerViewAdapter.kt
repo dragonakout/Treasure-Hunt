@@ -16,7 +16,7 @@ import com.treasure.hunt.Utils
 import com.treasure.hunt.data.Treasure
 
 
-class QuestRecyclerViewAdapter(val context: Context, var data: List<Treasure>, val callback: (treasure: Treasure) -> (Unit)) : RecyclerView.Adapter<QuestRecyclerViewAdapter.ViewHolder>() {
+class QuestRecyclerViewAdapter(val context: Context, var data: MutableList<Treasure>, val callback: (treasure: Treasure) -> (Unit)) : RecyclerView.Adapter<QuestRecyclerViewAdapter.ViewHolder>() {
 
     var inflater: LayoutInflater = LayoutInflater.from(context)
 

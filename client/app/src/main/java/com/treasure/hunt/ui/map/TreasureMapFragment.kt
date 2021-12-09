@@ -86,7 +86,6 @@ class TreasureMapFragment : Fragment(), OnMapReadyCallback, LocationListener {
         map.setMinZoomPreference(13.0f)
         map.setMaxZoomPreference(18.0f)
         map.setMapStyle(MapStyleOptions.loadRawResourceStyle(requireActivity(), R.raw.map_style))
-        // If location is not enabled, disable mylocation
 
         val treasures = (requireActivity() as MainActivity).treasures
         for (i in treasures) {
