@@ -1,25 +1,25 @@
-const uuid = require("uuid")
 class Tresor {
-  constructor (nom, montantEstime, montantActuel, duree, latitude, longitude) {
-    this.id = uuid.v4();
+  constructor (id, nom, montantEstime, montantActuel, latitude, longitude) {
+    this.id = id;
     this.nom = nom;
     this.montantEstime = montantEstime;
     this.montantActuel = montantActuel;
-    this.duree = duree;
     this.latitude = latitude;
     this.longitude = longitude;
+    this.timestampCollecte = "-1"
   }
 
 
   toJSON () {
       return {
         'id': this.id,
-        'nom': this.nom,
-        'montantEstime': this.montantEstime,
-        'montantActuel': this.montantActuel,
-        'duree': this.duree,
+        'name': this.nom,
+        'estimated_value': this.montantEstime,
+        'actual_value': this.montantActuel,
+        'quest_length': this.duree,
         'latitude': this.latitude,
-        'longitude': this.longitude
+        'longitude': this.longitude,
+        'collected_timestamp': this.timestampCollecte
       }
   }
 }

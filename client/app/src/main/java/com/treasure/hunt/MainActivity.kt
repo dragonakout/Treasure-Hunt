@@ -1,13 +1,16 @@
 package com.treasure.hunt
 
+import android.content.IntentFilter
 import android.os.Bundle
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.treasure.hunt.databinding.ActivityMainBinding
+import com.treasure.hunt.http.QuestBroadcastReceiver
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,6 +26,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val br = QuestBroadcastReceiver()
+        br.ma = this
+        val filter = IntentFilter(QuestBroadcastReceiver.AQUIRE_QUESTS)
+        LocalBroadcastManager.getInstance(this).registerReceiver(br, filter)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

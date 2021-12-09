@@ -2,12 +2,48 @@ const express = require('express');
 const router = express.Router();
 
 const Tresor = require('../Tresor.js');
-const Joueur = require('../Joueur.js');
+const User = require('../User.js');
+const gen = require('../GenerateurTresor.js')
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
-  //const p = new Partie(new Joueur('Albert', 'Ramos', 28, 56, 'Espagne'), new Joueur('Milos', 'Raonic', 28, 16, 'Canada'), '1', 'hale', '12h30');
-  res.send('Bienvenu dans le serveur du service Échanges.');
-  //res.send(p);
+    res.send('');
 });
+
+/* GET user with corresponding id*/
+router.get('/treasures/:id', function (req, res, next) {
+  console.log("Nouvelle requete!")
+  res.send(gen.listeTresors[req.params.id]);
+});
+
+/* GET user with corresponding id*/
+router.get('/treasures', function (req, res, next) {
+  console.log("Nouvelle requete!")
+  res.send(gen.listeTresors);
+});
+
+/* GET all uncompleted quests for user */
+router.get('/:id/quests', function (req, res, next) {
+  res.send(gen.listeTresors);
+});
+
+/* GET all completed treasure for user*/
+router.get('/:id/treasures', function (req, res, next) {
+  res.send(gen.listeTresors);
+});
+
+/* POST all completed treasures from the user*/
+router.post('/:id/treasures', function (req, res, next) {
+
+});
+
+/* POST register a user or its preferences in the server */
+router.post('/:id', function (req, res, next) {
+
+});
+
+
+
+
+
 module.exports = router;

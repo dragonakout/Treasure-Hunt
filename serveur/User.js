@@ -1,7 +1,6 @@
-/*const uuidv4 = require("uuid/v4")
-class Joueur {
-  constructor (nom, photoProfil) {
-    this.id = uuidv4;
+class User {
+  constructor (nom, photoProfil, id) {
+    this.id = id;
     this.nom = nom;
     this.tresorsCompletes = [];
     this.tresorsRestants = [];
@@ -19,5 +18,4 @@ class Joueur {
   }
 }
 
-module.exports = Joueur;
-*/
+module.exports = User;

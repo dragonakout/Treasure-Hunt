@@ -1,6 +1,7 @@
 package com.treasure.hunt.ui.quests
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,18 +9,17 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.toolbox.JsonObjectRequest
-import com.treasure.hunt.RequestHandler
+import com.treasure.hunt.MainActivity
 import com.treasure.hunt.data.Treasure
 import com.treasure.hunt.databinding.FragmentQuestsBinding
+import com.treasure.hunt.http.UpdateService
 import kotlin.random.Random
 
 class QuestsFragment : Fragment() {
 
     lateinit var booties: List<Treasure>
 
+    lateinit var recyclerViewAdapter: QuestRecyclerViewAdapter
     private lateinit var questsViewModel: QuestsViewModel
     private var _binding: FragmentQuestsBinding? = null
 
@@ -32,21 +32,9 @@ class QuestsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val url = "http://localhost:3000/tresor"
-
-        val jsonObjectRequest = JsonObjectRequest(
-            Request.Method.GET,
-            url,
-            null,
-            Response.Listener { response -> print(response) },
-            Response.ErrorListener { error ->
-                print(error)
-                // TODO: Handle error
-            },
-        )
-
-// Access the RequestQueue through your singleton class.
-        RequestHandler.getInstance(this.context).addToRequestQueue(jsonObjectRequest)
+        val activity: MainActivity? = this.activity as MainActivity?
+        val intent = Intent(activity, UpdateService::class.java)
+        activity?.startService(intent)
 
         questsViewModel =
             ViewModelProvider(this).get(QuestsViewModel::class.java)
@@ -61,8 +49,8 @@ class QuestsFragment : Fragment() {
             refreshLayout.isRefreshing = false
         }
         recyclerView.layoutManager = LinearLayoutManager(activity as Context);
-        val adapter = QuestRecyclerViewAdapter(activity as Context, createTreasures())
-        recyclerView.adapter = adapter
+        recyclerViewAdapter = QuestRecyclerViewAdapter(activity as Context, mutableListOf())
+        recyclerView.adapter = recyclerViewAdapter
         return root
     }
 
@@ -80,7 +68,7 @@ class QuestsFragment : Fragment() {
         print("Updated list!")
     }
 
-    fun createTreasures(): List<Treasure> {
+    fun createTreasures(): MutableList<Treasure> {
         val list: MutableList<Treasure> = mutableListOf()
         for (i in 0..9) {
             val booty_size =
@@ -93,14 +81,12 @@ class QuestsFragment : Fragment() {
             val booty_value_mul = 1 + (Random.Default.nextInt(1, 10) / 10.0)
             val treasure = Treasure(
                 i,
-                booty_size,
-                booty_adj,
                 booty_name,
-                0.0f,
-                0.0f,
                 booty_value,
                 booty_value * booty_value_mul,
-                "1h"
+                0.0f,
+                0.0f,
+                ""
             )
             list.add(treasure)
         }
