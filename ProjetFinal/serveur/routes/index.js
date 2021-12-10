@@ -21,26 +21,28 @@ router.post('/quests', function (req, res, next) {
   const user_id = req.body.user_id
   const location_longitude = req.body.location_longitude
   const location_latitude = req.body.location_latitude
+
+  if(user_id != undefined && gen.userSet.get(user_id) == undefined) {
+    gen.userSet.set(user_id, new User (user_id, "https://picsum.photos/10"))
+  }
+
   if(gen.userSet.get(user_id) != undefined) {
-    // If it has been more than 24hours since last time having new quests, generate new quests
-    
+    // If it has been more than 24 hours since last time having new quests, generate new quests
+
     //if((new Date).getTime() - gen.userSet.get(user_id).last_daily_quest_redeem > 86400000) {
       gen.userSet.get(user_id).quetes.map (function(t) { 
-        t.isNew = false
+        t.is_new = false
       })
       gen.genererTresor(gen.userSet.get(user_id).prefs.nb_daily_quests, gen.userSet.get(user_id))
     //}
-    res.send(gen.userSet.get(user_id).quetes);
+    res.send([gen.userSet.get(user_id).quetes, gen.userSet.get(user_id).tresors]);
   } else {
-    if(user_id != undefined) {
-      gen.userSet.set(user_id, new User (user_id, "https://picsum.photos/10"))
-    }
     res.send([]);
   }
 });
 
 /* GET all completed treasure for user*/
-router.get('/:id/treasures', function (req, res, next) {
+router.post('/:id/treasures', function (req, res, next) {
   const user_id = req.params.id
   if(gen.userSet.get(user_id) != undefined) {
     res.send(gen.userSet.get(user_id).tresors);
@@ -65,7 +67,7 @@ router.post('/:id/treasure', function (req, res, next) {
     gen.userSet.get(user_id).quetes.splice(index, 1);
   }
   
-  treasure_copy.timestampCollecte = collected_timestamp
+  treasure_copy.collected_timestamp = collected_timestamp
   gen.userSet.get(user_id).tresors.push(treasure_copy)
 
 });
@@ -74,9 +76,12 @@ router.post('/:id/treasure', function (req, res, next) {
 router.post('/dropquest', function (req, res, next) {
   const user_id = req.body.user_id;
   const treasure_id = req.body.treasure_id;
-  var index = gen.userSet.get(user_id).quetes.indexOf(obj => {
-    return obj.treasure_id === treasure_id
+
+  var treasure = gen.userSet.get(user_id).quetes.find(obj => {
+    return obj.id == treasure_id
   })
+
+  var index = gen.userSet.get(user_id).quetes.indexOf(treasure)
   if (index > -1) {
     gen.userSet.get(user_id).quetes.splice(index, 1);
   }

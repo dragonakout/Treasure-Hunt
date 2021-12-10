@@ -9,13 +9,13 @@ import com.treasure.hunt.Utils
 import com.treasure.hunt.data.Treasure
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.io.Serializable
 import java.lang.Exception
 
 class UpdateService : Service(), Serializable {
     private val binder: IBinder = UpdateManuallyBinder()
-    private var httpGetter: HttpGetter? = null
+    private var httpConnecter: HttpConnecter? = null
+    private var arrayQuests: ArrayList<Treasure>? = null
     private var arrayTreasures: ArrayList<Treasure>? = null
     private var requestString: String? = null
     private var queryParams: MutableMap<String, String>? = null
@@ -33,6 +33,7 @@ class UpdateService : Service(), Serializable {
     private fun startIntentBroadcast() {
         val intent = Intent()
         intent.action = QuestBroadcastReceiver.AQUIRE_QUESTS
+        intent.putExtra("arrayQuests", arrayQuests)
         intent.putExtra("arrayTreasures", arrayTreasures)
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
         stopSelf()
@@ -40,6 +41,7 @@ class UpdateService : Service(), Serializable {
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         requestString = intent.getStringExtra("request_string")
+        val isQuests = intent.getBooleanExtra("is_quests", true)
         try {
             queryParams = mutableMapOf()
             queryParams?.put("location_longitude", intent.getStringExtra("location_longitude")!!)
@@ -48,11 +50,14 @@ class UpdateService : Service(), Serializable {
         } catch (e: Exception) {
             print(e.stackTrace)
         }
-        httpGetter = HttpGetter(Utils.BASE_URL + requestString, queryParams)
+        httpConnecter = HttpConnecter(Utils.BASE_URL + requestString, queryParams)
+        arrayQuests = ArrayList()
         arrayTreasures = ArrayList()
         GlobalScope.launch {
-            httpGetter?.run();
-            arrayTreasures = httpGetter!!.listePartiesFromJSON ;
+            httpConnecter?.run();
+            val parsedResponse = httpConnecter!!.listeTreasureDataFromJSON ;
+            arrayQuests = parsedResponse.first
+            arrayTreasures = parsedResponse.second
             startIntentBroadcast() }
 
         return super.onStartCommand(intent, flags, startId)

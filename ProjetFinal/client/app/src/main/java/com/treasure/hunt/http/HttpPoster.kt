@@ -27,7 +27,7 @@ class HttpPoster(
             val url = URL(urlString)
             urlConnection = url.openConnection() as HttpURLConnection
             urlConnection.requestMethod = "POST"
-            urlConnection.readTimeout = 1000
+            urlConnection.readTimeout = 200
             urlConnection.connectTimeout = 15000
             urlConnection.doInput = true
             urlConnection.doOutput = true

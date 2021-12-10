@@ -21,6 +21,8 @@ object Utils {
 
     val EARTH_RADIUS = 6371000
     val BASE_URL = "http://10.0.2.2:3000"
+    val GEOFENCE_RADIUS_IN_METERS = 100.0
+
 
     // from https://stackoverflow.com/a/60337241/11725219
     fun formatIntString(int: Int) : String {
@@ -40,9 +42,12 @@ object Utils {
     fun angleToMeters(angle: Double) : Double {
         return (( 2 * PI * EARTH_RADIUS * angle) / 360)
     }
+    fun createConfirmationDialog(activity: Activity?, titre:String, message: String, okCallback: () -> (Unit)) {
+        createButtonedDialog(activity, titre, message, okCallback, true)
+    }
 
     // Based on the android docs for dialogs
-    fun createConfirmationDialog(activity: Activity?, titre:String, message: String, okCallback: () -> (Unit)) {
+    fun createButtonedDialog(activity: Activity?, titre:String, message: String, okCallback: () -> (Unit), hasNegativeChoice : Boolean) {
         val alertDialog: AlertDialog? = activity?.let {
             val builder = AlertDialog.Builder(it)
             builder.apply {
@@ -51,10 +56,12 @@ object Utils {
                         // User clicked OK button
                         okCallback()
                     })
-                setNegativeButton(R.string.cancel,
-                    DialogInterface.OnClickListener { dialog, id ->
-                        // User cancelled the dialog
-                    })
+                if(hasNegativeChoice) {
+                    setNegativeButton(R.string.cancel,
+                        DialogInterface.OnClickListener { dialog, id ->
+                            // User cancelled the dialog
+                        })
+                }
             }
             // Set other dialog properties
             builder.setMessage(message)

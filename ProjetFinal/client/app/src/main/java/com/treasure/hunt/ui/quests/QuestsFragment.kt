@@ -44,6 +44,7 @@ class QuestsFragment : Fragment() {
             updateList()
             refreshLayout.isRefreshing = false
         }
+        updateNoQuestUI((activity as MainActivity).treasures.size <= 0)
         recyclerView.layoutManager = LinearLayoutManager(activity as Context);
         recyclerViewAdapter = QuestRecyclerViewAdapter(activity as Context, (activity as MainActivity).treasures, ::onLongClickCallback)
         recyclerView.adapter = recyclerViewAdapter
@@ -55,6 +56,7 @@ class QuestsFragment : Fragment() {
         recyclerViewAdapter.data = treasures
         treasures.remove(treasure)
         recyclerViewAdapter.notifyDataSetChanged()
+        updateNoQuestUI(treasures.size <= 0)
         postRemovedTreasure(treasure)
     }
 
@@ -64,7 +66,7 @@ class QuestsFragment : Fragment() {
             Pair("treasure_id",treasure.id.toString()),
             Pair("user_id", userId),
         )
-        val url = Utils.BASE_URL + "/" + userId + "/dropquest"
+        val url = Utils.BASE_URL + "/dropquest"
         Utils.post(url, params)
     }
 
@@ -75,5 +77,19 @@ class QuestsFragment : Fragment() {
 
     private fun updateList() {
         (activity as MainActivity).updateData()
+    }
+
+    fun updateNoQuestUI(isListEmpty : Boolean) {
+        if(isListEmpty) {
+            binding.noQuestsPlaceholderExplanationTextview.visibility = View.VISIBLE
+            binding.noQuestsPlaceholderImageView.visibility = View.VISIBLE
+            binding.noQuestsPlaceholderNoQuestTextview.visibility = View.VISIBLE
+            binding.questsList.visibility = View.GONE
+        } else {
+            binding.noQuestsPlaceholderExplanationTextview.visibility = View.GONE
+            binding.noQuestsPlaceholderImageView.visibility = View.GONE
+            binding.noQuestsPlaceholderNoQuestTextview.visibility = View.GONE
+            binding.questsList.visibility = View.VISIBLE
+        }
     }
 }

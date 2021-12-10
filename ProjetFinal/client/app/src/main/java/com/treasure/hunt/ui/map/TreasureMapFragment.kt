@@ -20,26 +20,25 @@ import com.treasure.hunt.R
 import com.treasure.hunt.Utils
 import com.treasure.hunt.databinding.FragmentMapBinding
 
-class TreasureMapFragment : Fragment(), OnMapReadyCallback, LocationListener {
+class TreasureMapFragment : Fragment(), OnMapReadyCallback {
 
     private var binding: FragmentMapBinding? = null
     private var mapView: MapView? = null
     private var map: GoogleMap? = null
     private var lastlocationCoords: LatLng? = null
     private var currentPositionMarker: Marker? = null
-    private val GEOFENCE_RADIUS_IN_METERS = 100.0
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        InitializeLocationManager()
         binding = FragmentMapBinding.inflate(inflater, container, false)
         mapView = binding?.root?.findViewById(R.id.map_view)
         mapView?.onCreate(savedInstanceState)
         mapView?.getMapAsync(this)
         lastlocationCoords = getInitialLocation()
+        (activity as MainActivity).mapNotify = ::updateMapMarkerAndGeofences
 
         return binding!!.root
     }
@@ -97,27 +96,7 @@ class TreasureMapFragment : Fragment(), OnMapReadyCallback, LocationListener {
         }
     }
 
-    private fun InitializeLocationManager() {
-        // If location permission was granted
-        if (ActivityCompat.checkSelfPermission(
-                requireActivity(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED && lastlocationCoords == null
-        ) {
-            val locationManager = getSystemService(
-                requireContext(),
-                LocationManager::class.java
-            ) as LocationManager
-            locationManager.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER,
-                10000,
-                10f,
-                this
-            )
-        }
-    }
-
-    override fun onLocationChanged(location: Location) {
+    fun updateMapMarkerAndGeofences(location : LatLng) {
         lastlocationCoords = LatLng(location.latitude, location.longitude)
         currentPositionMarker?.remove()
         currentPositionMarker = map?.addMarker(
@@ -125,22 +104,6 @@ class TreasureMapFragment : Fragment(), OnMapReadyCallback, LocationListener {
                 .icon(BitmapDescriptorFactory.fromResource(R.raw.img_maps_marker))
                 .position(LatLng(lastlocationCoords!!.latitude, lastlocationCoords!!.longitude))
         )
-        if (activity != null) {
-            Utils.writeToSharedPrefs("lastLocationLatitude", location.latitude.toFloat(), activity)
-            Utils.writeToSharedPrefs("lastLocationLongitude", location.longitude.toFloat(), activity)
-            checkGeofences()
-        }
-    }
-
-    private fun checkGeofences() {
-        val treasures = (requireActivity() as MainActivity).treasures.toList()
-        val locationCoords = LatLng(lastlocationCoords!!.latitude, lastlocationCoords!!.longitude)
-        for (treasure in treasures) {
-            val treasureCoords = LatLng(treasure.latitude, treasure.longitude)
-            if (Utils.distanceCoordsToM(treasureCoords, locationCoords) < GEOFENCE_RADIUS_IN_METERS ) {
-                (activity as MainActivity).collectTreasure(treasure)
-            }
-        }
     }
 
     override fun onStart() {
@@ -161,6 +124,7 @@ class TreasureMapFragment : Fragment(), OnMapReadyCallback, LocationListener {
     override fun onStop() {
         super.onStop()
         mapView?.onStop()
+        (activity as MainActivity).mapNotify = null
     }
 
     override fun onLowMemory() {

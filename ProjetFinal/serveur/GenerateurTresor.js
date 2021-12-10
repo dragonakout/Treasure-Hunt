@@ -14,7 +14,8 @@ const MINIMUM_LONGITIDE = -71.96296752784556
 const MAXIMUM_LONGITIDE = -71.86304785226521
 
 function genererTresor(nb, user) {
-  for (i = 0; i < nb; i++) {
+  let offset = user.tresors.length
+  for (i = offset; i < nb + offset; i++) {
     let nom = bootySize[Math.floor(Math.random() * bootySize.length)] + " " + bootyName[Math.floor(Math.random()*bootyName.length)] + " " + bootyAdjective[Math.floor(Math.random()*bootyAdjective.length)];
     let montantEstime = (Math.floor(Math.random() * 20) + 5) * 1000;
     let montantActuel = Math.floor(((Math.random() * 1) + 1) * montantEstime);
@@ -25,6 +26,16 @@ function genererTresor(nb, user) {
   }
   user.last_daily_quest_redeem = new Date().getTime()
 }
+
+
+function getRandomPositionFromCenter(pos_long, pos_lat, rangeInM) {
+
+}
+
+function distanceInMetersToAngle(distance) {
+
+}
+
 
 module.exports = {};
 module.exports.userSet = userSet;

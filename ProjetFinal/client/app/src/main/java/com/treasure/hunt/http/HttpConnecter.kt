@@ -1,6 +1,8 @@
 package com.treasure.hunt.http
 
 import android.net.Uri
+import android.util.Log
+import android.widget.Toast
 import com.treasure.hunt.data.Treasure
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -14,7 +16,7 @@ import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 
-class HttpGetter(private val urlString: String, val queryParams: Map<String, String>?){
+class HttpConnecter(private val urlString: String, val queryParams: Map<String, String>?) {
     private var jsonString = ""
     suspend fun run() = withContext(Dispatchers.IO) {
         try {
@@ -22,15 +24,15 @@ class HttpGetter(private val urlString: String, val queryParams: Map<String, Str
             val url = URL(urlString)
             urlConnection = url.openConnection() as HttpURLConnection
             urlConnection.requestMethod = "POST"
-            urlConnection.readTimeout = 15000
+            urlConnection.readTimeout = 10000
             urlConnection.connectTimeout = 15000
             urlConnection.doOutput = true
             urlConnection.doInput = true
 
 
-//             params inspired from: https://stackoverflow.com/a/29053050/11725219
+//      params inspired from: https://stackoverflow.com/a/29053050/11725219
             val builder = Uri.Builder()
-            if(queryParams != null) {
+            if (queryParams != null) {
                 for (i in queryParams.keys) {
                     builder.appendQueryParameter(i, queryParams[i])
                 }
@@ -62,37 +64,36 @@ class HttpGetter(private val urlString: String, val queryParams: Map<String, Str
             br.close()
             jsonString = sb.toString()
             println("JSON: $jsonString")
+        } catch (e: java.net.ConnectException) {
+            Log.e("Connection", "Failed to connect to server")
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun parseJson(jsonString: String): ArrayList<Treasure> {
-        var arrayList: ArrayList<Treasure> = ArrayList()
-        try {
-            val jsonArray = JSONArray(jsonString)
-            println(jsonArray)
-            arrayList = ConvertJsonToPartiesList(jsonArray)
-        } catch (e: JSONException) {
-            e.printStackTrace()
-        }
-        return arrayList
-    }
-
-    val listePartiesFromJSON: ArrayList<Treasure>
-        get() = parseJson(jsonString)
-
-    companion object {
-        private fun ConvertJsonToPartiesList(array: JSONArray): ArrayList<Treasure> {
-            val arrayList: ArrayList<Treasure> = ArrayList()
+    private fun parseJson(jsonString: String): Pair<ArrayList<Treasure>,ArrayList<Treasure>> {
+        var quests: ArrayList<Treasure> = ArrayList()
+        var collectedTreasures: ArrayList<Treasure> = ArrayList()
+        if (jsonString.isNotEmpty()) {
             try {
-                for (i in 0 until array.length()) {
-                    arrayList.add(Treasure(array.getJSONObject(i)))
+                val jsonArray = JSONArray(jsonString)
+                println(jsonArray)
+                val jsonQuests = jsonArray.getJSONArray(0)
+                val jsonTreasures = jsonArray.getJSONArray(1)
+
+                for (i in 0 until jsonQuests.length()) {
+                    quests.add(Treasure(jsonQuests.getJSONObject(i)))
+                }
+                for (i in 0 until jsonTreasures.length()) {
+                    collectedTreasures.add(Treasure(jsonTreasures.getJSONObject(i)))
                 }
             } catch (e: JSONException) {
                 e.printStackTrace()
             }
-            return arrayList
         }
+        return Pair(quests,collectedTreasures)
     }
+
+    val listeTreasureDataFromJSON: Pair<ArrayList<Treasure>,ArrayList<Treasure>>
+        get() = parseJson(jsonString)
 }

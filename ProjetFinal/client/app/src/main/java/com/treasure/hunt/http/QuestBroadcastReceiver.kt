@@ -16,17 +16,24 @@ class QuestBroadcastReceiver : BroadcastReceiver(), Serializable {
 
     override fun onReceive(context: Context, intent: Intent) {
         val bundle = intent.extras
-        ma?.treasures = bundle!!.getSerializable("arrayTreasures")  as MutableList<Treasure>
+        val booty = bundle!!.getSerializable("arrayTreasures")  as MutableList<Treasure>?
+        val quests = bundle!!.getSerializable("arrayQuests")  as MutableList<Treasure>?
+        if(booty != null) {ma?.collectedTreasures = booty}
+        if(quests != null) {
+            ma?.treasures = quests
 
-        val navHostFragment = ma?.supportFragmentManager
-            ?.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
-        val f = navHostFragment.childFragmentManager.fragments[0]
-        if (f is QuestsFragment) {
-            val matchListF: QuestsFragment = f
-            matchListF.recyclerViewAdapter.data.clear()
-            matchListF.recyclerViewAdapter.data.addAll(bundle!!.getSerializable("arrayTreasures") as MutableList<Treasure>)
-            matchListF.recyclerViewAdapter.notifyDataSetChanged()
+            val navHostFragment = ma?.supportFragmentManager
+                ?.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment?
+            val f = navHostFragment?.childFragmentManager?.fragments?.get(0)
+            if (f is QuestsFragment) {
+                val questsFragment: QuestsFragment = f
+                questsFragment.recyclerViewAdapter.data.clear()
+                questsFragment.recyclerViewAdapter.data.addAll(quests)
+                questsFragment.recyclerViewAdapter.notifyDataSetChanged()
+                questsFragment.updateNoQuestUI(quests.size <= 0)
+            }
         }
+
     }
 
     companion object {
