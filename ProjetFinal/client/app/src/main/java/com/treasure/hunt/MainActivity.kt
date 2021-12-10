@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.location.LocationRequest
 import android.os.Build
 import android.os.Bundle
 import android.widget.EditText
@@ -30,6 +31,7 @@ import com.treasure.hunt.databinding.ActivityMainBinding
 import com.treasure.hunt.http.QuestBroadcastReceiver
 import com.treasure.hunt.http.UpdateService
 import java.util.*
+import java.util.function.Consumer
 import kotlin.math.roundToInt
 
 
@@ -56,7 +58,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        InitializeLocationManager()
 
         requestLocationPermission()
         treasures = mutableListOf()
@@ -69,8 +70,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
         br.ma = this
         val filter = IntentFilter(QuestBroadcastReceiver.AQUIRE_QUESTS)
         LocalBroadcastManager.getInstance(this).registerReceiver(br, filter)
-
-        updateData()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -98,10 +97,15 @@ class MainActivity : AppCompatActivity(), LocationListener {
                 }
                 }
             }
+
+            InitializeLocationManager()
+            updateData()
         }
         // If we already have permissions
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED) {
+            InitializeLocationManager()
+            updateData()
             return
         }
         val permissions = mutableListOf( Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -109,6 +113,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
                 permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
         }
         locationPermissionRequest.launch(permissions.toTypedArray())
+        InitializeLocationManager()
+
     }
 
 
@@ -126,7 +132,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
             locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER,
                 10000,
-                10f,
+                1f,
                 this
             )
         }
@@ -191,7 +197,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
         val long = Utils.readFloatFromSharedPrefs("lastLocationLongitude", this)
         val lat = Utils.readFloatFromSharedPrefs("lastLocationLatitude", this)
-        if (!(lat == null || long == null || (lat == 0f && long == 0f))) {
+        if (!(lat == null || long == null)) {
             questsIntent.putExtra("location_longitude", long.toString())
             questsIntent.putExtra("location_latitude", lat.toString())
         }

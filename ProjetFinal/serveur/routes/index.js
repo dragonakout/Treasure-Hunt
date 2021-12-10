@@ -22,7 +22,7 @@ router.post('/quests', function (req, res, next) {
   const location_longitude = req.body.location_longitude
   const location_latitude = req.body.location_latitude
 
-  if(user_id != undefined && gen.userSet.get(user_id) == undefined) {
+  if(user_id != undefined && user_id != "null" && gen.userSet.get(user_id) == undefined) {
     gen.userSet.set(user_id, new User (user_id, "https://picsum.photos/10"))
   }
 
@@ -33,7 +33,7 @@ router.post('/quests', function (req, res, next) {
       gen.userSet.get(user_id).quetes.map (function(t) { 
         t.is_new = false
       })
-      gen.genererTresor(gen.userSet.get(user_id).prefs.nb_daily_quests, gen.userSet.get(user_id))
+      gen.genererTresor(gen.userSet.get(user_id).prefs.nb_daily_quests, gen.userSet.get(user_id), location_latitude, location_longitude)
     //}
     res.send([gen.userSet.get(user_id).quetes, gen.userSet.get(user_id).tresors]);
   } else {

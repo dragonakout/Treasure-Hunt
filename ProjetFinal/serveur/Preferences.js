@@ -3,7 +3,7 @@ class Preferences {
       this.prefers_distance_measured_in_time = true,
       this.prefers_walking = true,
       this.assume_go_back = true,
-      this.average_distance = 2
+      this.average_distance = 1
       this.nb_daily_quests = 2
     }
 
