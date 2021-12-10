@@ -60,12 +60,17 @@ class MainActivity : AppCompatActivity(), LocationListener {
         super.onCreate(savedInstanceState)
 
         requestLocationPermission()
+
         treasures = mutableListOf()
         collectedTreasures = mutableListOf()
 
         if(Utils.getUserId(this).isNullOrBlank()) {
             createIdAlert()
         }
+        val title = "Autorisation d'utiliser les données de localisation"
+        val text = "Treasure Hunt utilise les données de positionnement afin de vous attribuer des trésors. Afin que l'application puisse bien fonctionner, vous devez autoriser la localisation en tout temps."
+        Utils.createButtonedDialog(this, title,text , fun() {}, false)
+
         br = QuestBroadcastReceiver()
         br.ma = this
         val filter = IntentFilter(QuestBroadcastReceiver.AQUIRE_QUESTS)
