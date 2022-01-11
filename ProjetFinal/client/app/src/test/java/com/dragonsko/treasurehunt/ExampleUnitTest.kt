@@ -1,4 +1,4 @@
-package com.treasure.hunt
+package com.dragonsko.treasurehunt
 
 import org.junit.Test
 

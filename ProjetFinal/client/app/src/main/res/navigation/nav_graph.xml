@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/navigation_booty_list"
-        android:name="com.treasure.hunt.ui.quests.QuestsFragment"
+        android:name="com.dragonsko.treasurehunt.ui.quests.QuestsFragment"
         android:label="@string/title_quests"
         tools:layout="@layout/fragment_quests" >
         <action
@@ -17,7 +17,7 @@
 
     <fragment
         android:id="@+id/navigation_treasure_map"
-        android:name="com.treasure.hunt.ui.map.TreasureMapFragment"
+        android:name="com.dragonsko.treasurehunt.ui.map.TreasureMapFragment"
         android:label="@string/title_map"
         tools:layout="@layout/fragment_map" >
         <argument
@@ -30,7 +30,7 @@
 
     <fragment
         android:id="@+id/navigation_aquired_booties"
-        android:name="com.treasure.hunt.ui.booty.BootyFragment"
+        android:name="com.dragonsko.treasurehunt.ui.treasures.TreasuresFragment"
         android:label="@string/title_aquired"
-        tools:layout="@layout/fragment_booty" />
+        tools:layout="@layout/fragment_treasures" />
 </navigation>

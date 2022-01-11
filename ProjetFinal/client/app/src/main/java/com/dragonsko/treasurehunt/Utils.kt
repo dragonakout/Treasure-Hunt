@@ -1,4 +1,4 @@
-package com.treasure.hunt
+package com.dragonsko.treasurehunt
 
 import android.app.Activity
 import android.app.AlertDialog
@@ -11,16 +11,15 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat.getSystemService
 import com.google.android.gms.maps.model.LatLng
-import com.treasure.hunt.http.HttpPoster
-import java.lang.Math.PI
-import kotlin.math.pow
-import kotlin.math.sqrt
+import com.dragonsko.treasurehunt.data.Treasure
+import com.dragonsko.treasurehunt.data.Quest
+import kotlinx.coroutines.launch
 
 
 object Utils {
 
-    val EARTH_RADIUS = 6371000
-    val BASE_URL = "http://10.0.2.2:3000"
+    val FOREGROUND_SERVICE_ID = 4242690
+    val EARTH_RADIUS_KM = 6371
     val GEOFENCE_RADIUS_IN_METERS = 100.0
 
 
@@ -30,18 +29,35 @@ object Utils {
     }
 
     fun distanceCoordsToM(coords1: LatLng, coords2: LatLng): Double {
-        val lat = coords1.latitude - coords2.latitude
-        val long = coords1.longitude - coords2.longitude
-        return sqrt(angleToMeters(lat).pow(2) + angleToMeters(long).pow(2)) // Enclidian distance
+        return distanceCoords(
+            coords1.latitude, coords2.latitude,
+            coords1.longitude, coords2.longitude)
     }
 
-    fun metersToAngle(meters: Int) : Double {
-        return (meters * 360) /( 2 * PI * EARTH_RADIUS)
+    /**
+    From https://stackoverflow.com/a/3694410/11725219
+     */
+    /**
+     * Calculate distance between two points in latitude and longitude taking
+     * into account height difference. If you are not interested in height
+     * difference pass 0.0. Uses Haversine method as its base.
+     *
+     * lat1, lon1 Start point lat2, lon2 End point el1 Start altitude in meters
+     * el2 End altitude in meters
+     * @returns Distance in Meters
+     */
+    private fun distanceCoords(
+        lat1: Double, lat2: Double, lon1: Double,
+        lon2: Double): Double {
+        val latDistance = Math.toRadians(lat2 - lat1)
+        val lonDistance = Math.toRadians(lon2 - lon1)
+        val a = (Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + (Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2)))
+        val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+        return EARTH_RADIUS_KM * c * 1000 // convert to meters
     }
 
-    fun angleToMeters(angle: Double) : Double {
-        return (( 2 * PI * EARTH_RADIUS * angle) / 360)
-    }
     fun createConfirmationDialog(activity: Activity?, titre:String, message: String, okCallback: () -> (Unit)) {
         createButtonedDialog(activity, titre, message, okCallback, true)
     }
@@ -150,18 +166,37 @@ object Utils {
         } else userId
     }
 
-    fun post(url: String, params: Map<String, String>) {
-        val httpPoster = HttpPoster(
-            url
-            ,
-            params
-        )
-        val thread = Thread(httpPoster)
-        try {
-            thread.start()
-            thread.join()
-        } catch (e: InterruptedException) {
-            e.printStackTrace()
+    fun insert(treasure : Any, applicationContext : Context?) {
+        (applicationContext as MainApplication).applicationScope.launch {
+            when (treasure) {
+                is Quest -> {
+                    (applicationContext as MainApplication).database.QuestDao()
+                        .createQuest(treasure)
+                }
+                is Treasure -> {
+                    (applicationContext as MainApplication).database.TreasuresDao()
+                        .createTreasure(treasure)
+                }
+            }
         }
+    }
+
+    fun delete(treasure : Any, applicationContext : Context?) {
+        (applicationContext as MainApplication).applicationScope.launch {
+            when(treasure) {
+                is Quest -> {
+                    (applicationContext as MainApplication).database.QuestDao().deleteQuest(treasure)
+                }
+                is Treasure -> {
+                    (applicationContext as MainApplication).database.TreasuresDao().deleteTreasure(treasure)
+                }
+            }
+        }
+    }
+
+    fun getAll(applicationContext : Context?) : Pair<List<Quest>, List<Treasure>> {
+            val quests = (applicationContext as MainApplication).database.QuestDao().getAllQuests()
+            val treasures = (applicationContext as MainApplication).database.TreasuresDao().getAllTreasure()
+        return Pair(quests, treasures)
     }
 }

@@ -1,25 +1,21 @@
-package com.treasure.hunt.ui.quests
+package com.dragonsko.treasurehunt.ui.quests
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.treasure.hunt.MainActivity
+import com.dragonsko.treasurehunt.MainActivity
 import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.treasure.hunt.Utils
-import com.treasure.hunt.data.Treasure
-import com.treasure.hunt.databinding.FragmentQuestsBinding
-import com.treasure.hunt.http.UpdateService
-import kotlin.random.Random
+import com.dragonsko.treasurehunt.Utils
+import com.dragonsko.treasurehunt.data.Quest
+import com.dragonsko.treasurehunt.databinding.FragmentQuestsBinding
 
 class QuestsFragment : Fragment() {
 
-    lateinit var booties: List<Treasure>
+    lateinit var booties: List<Quest>
 
     lateinit var recyclerViewAdapter: QuestRecyclerViewAdapter
     private var _binding: FragmentQuestsBinding? = null
@@ -44,30 +40,20 @@ class QuestsFragment : Fragment() {
             updateList()
             refreshLayout.isRefreshing = false
         }
-        updateNoQuestUI((activity as MainActivity).treasures.size <= 0)
+        updateNoQuestUI((activity as MainActivity).quests.size <= 0)
         recyclerView.layoutManager = LinearLayoutManager(activity as Context);
-        recyclerViewAdapter = QuestRecyclerViewAdapter(activity as Context, (activity as MainActivity).treasures, ::onLongClickCallback)
+        recyclerViewAdapter = QuestRecyclerViewAdapter(activity as Context, (activity as MainActivity).quests, ::onLongClickCallback)
         recyclerView.adapter = recyclerViewAdapter
         return root
     }
     // TODO: Fix the item duplication
-    private fun onLongClickCallback(treasure: Treasure) {
-        val treasures = (activity as MainActivity).treasures
+    private fun onLongClickCallback(quest: Quest) {
+        val treasures = (activity as MainActivity).quests
         recyclerViewAdapter.data = treasures
-        treasures.remove(treasure)
+        treasures.remove(quest)
         recyclerViewAdapter.notifyDataSetChanged()
         updateNoQuestUI(treasures.size <= 0)
-        postRemovedTreasure(treasure)
-    }
-
-    private fun postRemovedTreasure(treasure: Treasure) {
-        val userId = Utils.getUserId(activity)!!
-        val params = mapOf(
-            Pair("treasure_id",treasure.id.toString()),
-            Pair("user_id", userId),
-        )
-        val url = Utils.BASE_URL + "/dropquest"
-        Utils.post(url, params)
+        Utils.delete(quest, activity?.applicationContext)
     }
 
     override fun onDestroyView() {

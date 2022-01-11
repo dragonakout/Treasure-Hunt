@@ -1,4 +1,4 @@
-package com.treasure.hunt.ui.booty
+package com.dragonsko.treasurehunt.ui.treasures
 
 import android.content.Context
 import android.os.Bundle
@@ -8,14 +8,14 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.treasure.hunt.MainActivity
-import com.treasure.hunt.Utils
-import com.treasure.hunt.databinding.FragmentBootyBinding
+import com.dragonsko.treasurehunt.MainActivity
+import com.dragonsko.treasurehunt.Utils
+import com.dragonsko.treasurehunt.databinding.FragmentTreasuresBinding
 
-class BootyFragment : Fragment() {
+class TreasuresFragment : Fragment() {
 
 
-    private var _binding: FragmentBootyBinding? = null
+    private var _binding: FragmentTreasuresBinding? = null
 
     private val binding get() = _binding!!
 
@@ -25,18 +25,17 @@ class BootyFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
 
-        _binding = FragmentBootyBinding.inflate(inflater, container, false)
+        _binding = FragmentTreasuresBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val bootyValueTextView: TextView = binding.bootyTotalValue
-        var totalBooty = Utils.readStringFromSharedPrefs("total_booty",activity)
-        if (totalBooty.isNullOrBlank()) totalBooty = "0"
+        val treasureValueTextView: TextView = binding.bootyTotalValue
+        var totaltreasure = (activity as MainActivity).collectedTreasures.sumOf { t -> t.actual_value }
 
-        bootyValueTextView.text = "Butin total : $totalBooty "
+        treasureValueTextView.text = "Butin total : ${Utils.formatIntString(totaltreasure)} "
 
         val recyclerView = binding.bootyList
         recyclerView.layoutManager = LinearLayoutManager(activity as Context);
-        val adapter = BootyRecyclerViewAdapter(activity as Context, (activity as MainActivity).collectedTreasures )
+        val adapter = TreasuresRecyclerViewAdapter(activity as Context, (activity as MainActivity).collectedTreasures )
         recyclerView.adapter = adapter
         return root
     }

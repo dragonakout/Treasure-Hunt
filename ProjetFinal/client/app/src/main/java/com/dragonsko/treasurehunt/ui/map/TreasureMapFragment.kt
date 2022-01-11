@@ -1,24 +1,20 @@
-package com.treasure.hunt.ui.map
+package com.dragonsko.treasurehunt.ui.map
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
-import com.google.android.gms.maps.*
 import com.google.android.gms.maps.OnMapReadyCallback
+import com.dragonsko.treasurehunt.MainActivity
+import com.dragonsko.treasurehunt.R
+import com.dragonsko.treasurehunt.Utils
+import com.dragonsko.treasurehunt.databinding.FragmentMapBinding
+import com.dragonsko.treasurehunt.service.LocationService
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.*
-import com.treasure.hunt.MainActivity
-import com.treasure.hunt.R
-import com.treasure.hunt.Utils
-import com.treasure.hunt.databinding.FragmentMapBinding
 
 class TreasureMapFragment : Fragment(), OnMapReadyCallback {
 
@@ -38,18 +34,19 @@ class TreasureMapFragment : Fragment(), OnMapReadyCallback {
         mapView?.onCreate(savedInstanceState)
         mapView?.getMapAsync(this)
         lastlocationCoords = getInitialLocation()
-        (activity as MainActivity).mapNotify = ::updateMapMarkerAndGeofences
+        (activity as MainActivity).service?.initializeLocationManager()
+        (activity as MainActivity).service?.mapNotify = ::updateMapMarkerAndGeofences
 
         return binding!!.root
     }
 
     private fun getInitialLocation(): LatLng {
-        val lat = Utils.readFloatFromSharedPrefs("lastLocationLatitude", activity)
-        val long = Utils.readFloatFromSharedPrefs("lastLocationLongitude", activity)
-        return if(lat == null || long == null || (lat == 0f && long == 0f)) {
+        val lat = (activity as MainActivity).last_position?.latitude
+        val long = (activity as MainActivity).last_position?.longitude
+        return if(lat == null || long == null) {
             LatLng(45.38206, -71.92831) // UdeS
         } else {
-            LatLng(lat.toDouble(),long.toDouble())
+            (activity as MainActivity).last_position!!
         }
     }
 
@@ -87,8 +84,8 @@ class TreasureMapFragment : Fragment(), OnMapReadyCallback {
         map.setMaxZoomPreference(18.0f)
         map.setMapStyle(MapStyleOptions.loadRawResourceStyle(requireActivity(), R.raw.map_style))
 
-        val treasures = (requireActivity() as MainActivity).treasures
-        for (i in treasures) {
+        val treasures = (requireActivity() as MainActivity).quests
+        for (i in treasures!!) {
             val mark = GroundOverlayOptions()
                 .image(BitmapDescriptorFactory.fromResource(R.raw.img_x_mark))
                 .position(LatLng(i.latitude, i.longitude), 75f, 75f)
@@ -104,6 +101,9 @@ class TreasureMapFragment : Fragment(), OnMapReadyCallback {
                 .icon(BitmapDescriptorFactory.fromResource(R.raw.img_maps_marker))
                 .position(LatLng(lastlocationCoords!!.latitude, lastlocationCoords!!.longitude))
         )
+        if(arguments?.get("lattitude") == null || arguments?.get("longitude") == null ) {
+            map?.moveCamera(CameraUpdateFactory.newLatLng(location))
+        }
     }
 
     override fun onStart() {
@@ -124,7 +124,7 @@ class TreasureMapFragment : Fragment(), OnMapReadyCallback {
     override fun onStop() {
         super.onStop()
         mapView?.onStop()
-        (activity as MainActivity).mapNotify = null
+        (activity as MainActivity).service?.mapNotify = null
     }
 
     override fun onLowMemory() {
