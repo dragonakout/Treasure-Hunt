@@ -110,7 +110,7 @@ class LocationService : Service(), Serializable, LocationListener {
 
 
     private fun checkGeofences(latitude: Double, longitude: Double) {
-        if(activity == null && quests == null) return
+        if(activity == null && quests.isNullOrEmpty()) return
         val treasures = if(quests.isNullOrEmpty()) activity?.quests?.toList() else quests?.toList()
         for (treasure in treasures!!) {
             val treasureCoords = LatLng(treasure.latitude, treasure.longitude)
@@ -156,6 +156,12 @@ class LocationService : Service(), Serializable, LocationListener {
         activity = null
         unregisterReceiver(receiver)
         INSTANCE = null
+        initialized = false
+    }
+
+    fun reset() {
+        activity = null
+        initialized = false
     }
 
 
@@ -164,6 +170,7 @@ class LocationService : Service(), Serializable, LocationListener {
 
         fun getLocationService(context: Context, mainActivity: MainActivity): LocationService {
             if (INSTANCE != null) {
+                INSTANCE!!.activity = mainActivity
                 return INSTANCE!!
             }
             val serviceIntent = Intent(context, LocationService::class.java)

@@ -42,7 +42,6 @@ class MainActivity : AppCompatActivity() {
      */
     private lateinit var binding: ActivityMainBinding
     var last_position: LatLng? = null
-    private var isUpdatingData : Boolean = false
 
     lateinit var quests : MutableList<Quest>
     lateinit var collectedTreasures : MutableList<Treasure>
@@ -95,13 +94,11 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             InitializeLocationService()
-             updateData()
         }
         // If we already have permissions
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED) {
             InitializeLocationService()
-            updateData()
             return
         } else {
             val title = "Autorisation d'utiliser les données de localisation"
@@ -120,6 +117,10 @@ class MainActivity : AppCompatActivity() {
         val activity = this
         (applicationContext as MainApplication).applicationScope.launch {
             service = LocationService.getLocationService(applicationContext, activity)
+            runOnUiThread {
+                service?.initializeLocationManager()
+            }
+            updateData()
         }
     }
 
@@ -134,6 +135,11 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
         service?.isActivityActive = false
         service?.quests = quests
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        service?.reset()
     }
 
 
@@ -159,8 +165,6 @@ class MainActivity : AppCompatActivity() {
     fun updateData() {
         val activity = this
         (applicationContext as MainApplication).applicationScope.launch {
-            if(!activity.isUpdatingData) {
-                activity.isUpdatingData = true
                 val data = Utils.getAll(applicationContext)
                 quests = data.first.toMutableList()
                 collectedTreasures = data.second.toMutableList()
@@ -172,11 +176,12 @@ class MainActivity : AppCompatActivity() {
                     val questsFragment: QuestsFragment = f
                     questsFragment.recyclerViewAdapter.data.clear()
                     questsFragment.recyclerViewAdapter.data.addAll(quests)
-                    questsFragment.recyclerViewAdapter.notifyDataSetChanged()
-                    questsFragment.updateNoQuestUI(quests.size <= 0)
+                    runOnUiThread{
+                        questsFragment.recyclerViewAdapter.notifyDataSetChanged()
+                        questsFragment.updateNoQuestUI(quests.size <= 0)
+                    }
+
                 }
-                activity.isUpdatingData = false
-            }
         }
     }
 }

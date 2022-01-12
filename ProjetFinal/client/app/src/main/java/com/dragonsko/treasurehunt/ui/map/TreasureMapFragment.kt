@@ -34,7 +34,6 @@ class TreasureMapFragment : Fragment(), OnMapReadyCallback {
         mapView?.onCreate(savedInstanceState)
         mapView?.getMapAsync(this)
         lastlocationCoords = getInitialLocation()
-        (activity as MainActivity).service?.initializeLocationManager()
         (activity as MainActivity).service?.mapNotify = ::updateMapMarkerAndGeofences
 
         return binding!!.root
@@ -90,6 +89,7 @@ class TreasureMapFragment : Fragment(), OnMapReadyCallback {
                 .image(BitmapDescriptorFactory.fromResource(R.raw.img_x_mark))
                 .position(LatLng(i.latitude, i.longitude), 75f, 75f)
             map.addGroundOverlay(mark);
+            mark.visible(false)
         }
     }
 
