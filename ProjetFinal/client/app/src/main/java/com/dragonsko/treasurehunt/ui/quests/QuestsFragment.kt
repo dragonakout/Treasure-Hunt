@@ -53,7 +53,7 @@ class QuestsFragment : Fragment() {
         treasures.remove(quest)
         recyclerViewAdapter.notifyDataSetChanged()
         updateNoQuestUI(treasures.size <= 0)
-        Utils.delete(quest, activity?.applicationContext)
+        Utils.DBdelete(quest, activity?.applicationContext)
     }
 
     override fun onDestroyView() {

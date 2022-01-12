@@ -166,7 +166,7 @@ object Utils {
         } else userId
     }
 
-    fun insert(treasure : Any, applicationContext : Context?) {
+    fun DBinsert(treasure : Any, applicationContext : Context?) {
         (applicationContext as MainApplication).applicationScope.launch {
             when (treasure) {
                 is Quest -> {
@@ -181,7 +181,7 @@ object Utils {
         }
     }
 
-    fun delete(treasure : Any, applicationContext : Context?) {
+    fun DBdelete(treasure : Any, applicationContext : Context?) {
         (applicationContext as MainApplication).applicationScope.launch {
             when(treasure) {
                 is Quest -> {
@@ -194,9 +194,11 @@ object Utils {
         }
     }
 
-    fun getAll(applicationContext : Context?) : Pair<List<Quest>, List<Treasure>> {
+    fun DBgetAll(applicationContext : Context?) : Pair<List<Quest>, List<Treasure>> {
             val quests = (applicationContext as MainApplication).database.QuestDao().getAllQuests()
             val treasures = (applicationContext as MainApplication).database.TreasuresDao().getAllTreasure()
         return Pair(quests, treasures)
     }
+
+
 }

@@ -4,8 +4,6 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationListener
 import android.os.Build
 import android.os.Bundle
 import android.widget.EditText
@@ -25,7 +23,6 @@ import com.dragonsko.treasurehunt.databinding.ActivityMainBinding
 import com.dragonsko.treasurehunt.service.LocationService
 import com.dragonsko.treasurehunt.ui.quests.QuestsFragment
 import kotlinx.coroutines.launch
-import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -77,7 +74,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun addTreasure() {
         val quest = Quest(0, "Gros trésor maudit",10000,12000, 45.3757154,-71.8995804, true)
-        Utils.insert(quest, applicationContext)
+        Utils.DBinsert(quest, applicationContext)
     }
 
     private fun requestLocationPermission() {
@@ -165,7 +162,7 @@ class MainActivity : AppCompatActivity() {
     fun updateData() {
         val activity = this
         (applicationContext as MainApplication).applicationScope.launch {
-                val data = Utils.getAll(applicationContext)
+                val data = Utils.DBgetAll(applicationContext)
                 quests = data.first.toMutableList()
                 collectedTreasures = data.second.toMutableList()
 

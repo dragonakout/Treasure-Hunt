@@ -125,11 +125,11 @@ class LocationService : Service(), Serializable, LocationListener {
     }
 
     fun collectTreasure(quest: Quest) {
-        Utils.delete(quest, applicationContext)
+        Utils.DBdelete(quest, applicationContext)
         val collectedTreasure = Treasure(quest, getCurrentDate())
         activity?.quests?.remove(quest)
         activity?.collectedTreasures?.add(collectedTreasure)
-        Utils.insert(collectedTreasure, applicationContext)
+        Utils.DBinsert(collectedTreasure, applicationContext)
 
         val notifTitle = "Butin récupéré !"
         val notifShort = "Vous avez collecté le ${quest.name.lowercase(Locale.getDefault())} !"
@@ -138,6 +138,7 @@ class LocationService : Service(), Serializable, LocationListener {
         Utils.createNotification(this, notifTitle, notifShort, notifDesc, quest.id)
         if (isActivityActive) {
             Utils.createButtonedDialog(activity, notifTitle, notifDesc, fun() {}, false)
+            activity?.updateData()
         }
     }
 
