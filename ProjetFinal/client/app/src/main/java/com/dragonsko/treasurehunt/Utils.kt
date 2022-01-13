@@ -15,7 +15,6 @@ import com.dragonsko.treasurehunt.data.Treasure
 import com.dragonsko.treasurehunt.data.Quest
 import kotlinx.coroutines.launch
 import java.util.*
-import kotlin.math.nextUp
 
 
 object Utils {
@@ -23,11 +22,12 @@ object Utils {
     val FOREGROUND_SERVICE_ID = 4242690
     val EARTH_RADIUS_KM = 6371
     val GEOFENCE_RADIUS_IN_METERS = 100.0
-    val NUMBER_OF_DAILY_QUESTS = 2
+    val NUMBER_OF_DAILY_QUESTS = 10
     val AVERAGE_DISTANCE_M = 1000
     val DAY_IN_MILLIS = 86400000
     val COIN_ESTIMATE_DIVIDER = 100
     val COIN_ACTUAL_DIVIDER = 5
+    val AVERAGE_WALKING_SPEED_IN_KMPH = 4
 
 
     // from https://stackoverflow.com/a/60337241/11725219
@@ -62,21 +62,20 @@ object Utils {
     }
 
 
-    private fun getRandomPositionFromCenter(pos: LatLng, distance: Double): LatLng {
+    private fun getRandomPositionFromCenter(pos: LatLng, distance: Int): LatLng {
         val possibleMultipliers = listOf(-1, 1)
         val surfaceAngle = Random().nextDouble()
 
-        val latitudeOrientation = Random().nextInt(possibleMultipliers.size)
-        val longitudeOrientation = Random().nextInt(possibleMultipliers.size)
+        val latitudeOrientation = possibleMultipliers[Random().nextInt(possibleMultipliers.size)]
+        val longitudeOrientation = possibleMultipliers[Random().nextInt(possibleMultipliers.size)]
 
 
-        val distRad = distance / 1000 / EARTH_RADIUS_KM
+        val distRad = distance.toDouble() / 1000 / EARTH_RADIUS_KM
         val distanceLatRad = Math.atan(Math.tan(distRad) * Math.cos(surfaceAngle))
         val distanceLongRad = Math.asin(Math.sin(distRad) * Math.sin(surfaceAngle))
         val latitude = pos.latitude + latitudeOrientation * Math.toDegrees(distanceLatRad)
         val longitude = pos.longitude + longitudeOrientation * Math.toDegrees(distanceLongRad)
 
-        // placeholder: LatLng(45.3757154,-71.8995804)
         return LatLng(latitude, longitude)
     }
 
@@ -229,18 +228,39 @@ object Utils {
 
     fun generateQuest(position: LatLng): Quest {
         val multiplier = (Random().nextGaussian() + 3) / 3
-        val distance = AVERAGE_DISTANCE_M * multiplier
+        val distance = (AVERAGE_DISTANCE_M * multiplier).toInt()
         val treasurePos = getRandomPositionFromCenter(position, distance)
         val values = getValuesFromDistance(distance)
-        return Quest(0, "Gros trésor maudit",values.first,values.second, treasurePos.latitude,treasurePos.longitude, true)
+        val estimatedTime = getTimeFromDistance(distance)
+        val questName = NameGenerator.generateQuestName(distance, AVERAGE_DISTANCE_M)
+        return Quest(0, questName, estimatedTime, values.first,values.second, treasurePos.latitude,treasurePos.longitude, true)
     }
 
-    private fun getValuesFromDistance(distance: Double) : Pair<Int,Int> {
+    private fun getTimeFromDistance(distance: Int): String {
+        val timeString : String
+        val actualDistance = distance.toDouble() * 2
+        val numberOfHours = Math.floor(actualDistance / (AVERAGE_WALKING_SPEED_IN_KMPH * 1000)).toInt()
+        if(numberOfHours > 24) {
+            timeString = "${Math.floor( (numberOfHours / 24).toDouble() ).toInt()} jours"
+        }
+        else if(numberOfHours > 0) {
+            timeString = if(numberOfHours == 1) {
+                "1 heure"
+            } else {
+                "$numberOfHours heures"
+            }
+        } else {
+            timeString = "${Math.floor((actualDistance / (AVERAGE_WALKING_SPEED_IN_KMPH * 1000)) * 60.0).toInt() } minutes"
+        }
+        return timeString
+    }
+
+    private fun getValuesFromDistance(distance: Int) : Pair<Int,Int> {
         val estimate = distance - distance % COIN_ESTIMATE_DIVIDER
-        val actual_tmp = Math.floor(Math.pow(estimate, 1 + (Random().nextGaussian() + 3) / 72))
+        val actual_tmp = Math.floor(Math.pow(estimate.toDouble(), 1 + (Random().nextGaussian() + 3) / 72))
         val actual = actual_tmp - actual_tmp % COIN_ACTUAL_DIVIDER
 
-        return Pair(estimate.toInt(), actual.toInt())
+        return Pair(estimate, actual.toInt())
     }
 
 }

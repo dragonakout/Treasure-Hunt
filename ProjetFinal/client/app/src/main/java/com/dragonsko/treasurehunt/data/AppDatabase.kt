@@ -5,6 +5,10 @@ import androidx.room.*
 import androidx.room.migration.AutoMigrationSpec
 import kotlinx.coroutines.CoroutineScope
 
+
+// DROP DB Util:
+// applicationContext.deleteDatabase("app_database")
+
 @Database(
     version = 1,
     entities = [Quest::class, Treasure::class],
