@@ -14,6 +14,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.dragonsko.treasurehunt.data.Treasure
 import com.dragonsko.treasurehunt.data.Quest
 import kotlinx.coroutines.launch
+import java.util.*
+import kotlin.math.nextUp
 
 
 object Utils {
@@ -21,6 +23,11 @@ object Utils {
     val FOREGROUND_SERVICE_ID = 4242690
     val EARTH_RADIUS_KM = 6371
     val GEOFENCE_RADIUS_IN_METERS = 100.0
+    val NUMBER_OF_DAILY_QUESTS = 2
+    val AVERAGE_DISTANCE_M = 1000
+    val DAY_IN_MILLIS = 86400000
+    val COIN_ESTIMATE_DIVIDER = 100
+    val COIN_ACTUAL_DIVIDER = 5
 
 
     // from https://stackoverflow.com/a/60337241/11725219
@@ -29,7 +36,7 @@ object Utils {
     }
 
     fun distanceCoordsToM(coords1: LatLng, coords2: LatLng): Double {
-        return distanceCoords(
+        return distanceBetweenCoords(
             coords1.latitude, coords2.latitude,
             coords1.longitude, coords2.longitude)
     }
@@ -38,24 +45,39 @@ object Utils {
     From https://stackoverflow.com/a/3694410/11725219
      */
     /**
-     * Calculate distance between two points in latitude and longitude taking
-     * into account height difference. If you are not interested in height
-     * difference pass 0.0. Uses Haversine method as its base.
+     * Calculate distance between two points in latitude and longitude.
      *
-     * lat1, lon1 Start point lat2, lon2 End point el1 Start altitude in meters
-     * el2 End altitude in meters
+     * lat1, lon1 Start point lat2, lon2 End point
      * @returns Distance in Meters
      */
-    private fun distanceCoords(
-        lat1: Double, lat2: Double, lon1: Double,
-        lon2: Double): Double {
+    private fun distanceBetweenCoords(lat1: Double, lat2: Double, lon1: Double, lon2: Double): Double {
         val latDistance = Math.toRadians(lat2 - lat1)
         val lonDistance = Math.toRadians(lon2 - lon1)
-        val a = (Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
-                + (Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2)))
-        val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-        return EARTH_RADIUS_KM * c * 1000 // convert to meters
+        val a = (Math.pow(Math.sin(latDistance / 2), 2.0)
+                + (Math.cos(Math.toRadians(lat1))
+                * Math.cos(Math.toRadians(lat2))
+                * Math.pow(Math.sin(lonDistance / 2), 2.0)))
+        val arcLength = 2 * Math.asin(Math.sqrt(a))
+        return EARTH_RADIUS_KM * arcLength * 1000 // convert to meters
+    }
+
+
+    private fun getRandomPositionFromCenter(pos: LatLng, distance: Double): LatLng {
+        val possibleMultipliers = listOf(-1, 1)
+        val surfaceAngle = Random().nextDouble()
+
+        val latitudeOrientation = Random().nextInt(possibleMultipliers.size)
+        val longitudeOrientation = Random().nextInt(possibleMultipliers.size)
+
+
+        val distRad = distance / 1000 / EARTH_RADIUS_KM
+        val distanceLatRad = Math.atan(Math.tan(distRad) * Math.cos(surfaceAngle))
+        val distanceLongRad = Math.asin(Math.sin(distRad) * Math.sin(surfaceAngle))
+        val latitude = pos.latitude + latitudeOrientation * Math.toDegrees(distanceLatRad)
+        val longitude = pos.longitude + longitudeOrientation * Math.toDegrees(distanceLongRad)
+
+        // placeholder: LatLng(45.3757154,-71.8995804)
+        return LatLng(latitude, longitude)
     }
 
     fun createConfirmationDialog(activity: Activity?, titre:String, message: String, okCallback: () -> (Unit)) {
@@ -166,6 +188,11 @@ object Utils {
         } else userId
     }
 
+    fun getLastDailyQuestUpdate(activity: Activity?): String? {
+        val timestamp = readStringFromSharedPrefs("daily_quest_update_timestamp", activity)
+        return if( timestamp.isNullOrBlank()) null else timestamp
+    }
+
     fun DBinsert(treasure : Any, applicationContext : Context?) {
         (applicationContext as MainApplication).applicationScope.launch {
             when (treasure) {
@@ -200,5 +227,20 @@ object Utils {
         return Pair(quests, treasures)
     }
 
+    fun generateQuest(position: LatLng): Quest {
+        val multiplier = (Random().nextGaussian() + 3) / 3
+        val distance = AVERAGE_DISTANCE_M * multiplier
+        val treasurePos = getRandomPositionFromCenter(position, distance)
+        val values = getValuesFromDistance(distance)
+        return Quest(0, "Gros trésor maudit",values.first,values.second, treasurePos.latitude,treasurePos.longitude, true)
+    }
+
+    private fun getValuesFromDistance(distance: Double) : Pair<Int,Int> {
+        val estimate = distance - distance % COIN_ESTIMATE_DIVIDER
+        val actual_tmp = Math.floor(Math.pow(estimate, 1 + (Random().nextGaussian() + 3) / 72))
+        val actual = actual_tmp - actual_tmp % COIN_ACTUAL_DIVIDER
+
+        return Pair(estimate.toInt(), actual.toInt())
+    }
 
 }

@@ -103,6 +103,7 @@ class LocationService : Service(), Serializable, LocationListener {
     override fun onLocationChanged(location: Location) {
         checkGeofences(location.latitude, location.longitude)
         activity?.last_position = LatLng(location.latitude, location.longitude)
+        activity?.updateData()
         if (isActivityActive) {
             mapNotify?.let { it(LatLng(location.latitude, location.longitude)) }
         }
@@ -144,11 +145,8 @@ class LocationService : Service(), Serializable, LocationListener {
 
     private fun getCurrentDate(): String {
         val calendar = Calendar.getInstance()
-        return "${calendar.get(Calendar.DAY_OF_MONTH)}/${calendar.get(Calendar.MONTH) + 1}/${
-            calendar.get(
-                Calendar.YEAR
-            )
-        }"
+        val monthString : String = if(calendar.get(Calendar.MONTH) < 9) "0" + (calendar.get(Calendar.MONTH) + 1) else (calendar.get(Calendar.MONTH) + 1).toString()
+        return "${calendar.get(Calendar.DAY_OF_MONTH)}/$monthString/${calendar.get(Calendar.YEAR)}"
     }
 
     override fun onDestroy() {

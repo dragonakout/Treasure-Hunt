@@ -15,14 +15,15 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.dragonsko.treasurehunt.data.Treasure
 import com.dragonsko.treasurehunt.data.Quest
+import com.dragonsko.treasurehunt.data.Treasure
 import com.dragonsko.treasurehunt.databinding.ActivityMainBinding
 import com.dragonsko.treasurehunt.service.LocationService
 import com.dragonsko.treasurehunt.ui.quests.QuestsFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -73,8 +74,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addTreasure() {
-        val quest = Quest(0, "Gros trésor maudit",10000,12000, 45.3757154,-71.8995804, true)
-        Utils.DBinsert(quest, applicationContext)
     }
 
     private fun requestLocationPermission() {
@@ -117,7 +116,6 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread {
                 service?.initializeLocationManager()
             }
-            updateData()
         }
     }
 
@@ -162,6 +160,7 @@ class MainActivity : AppCompatActivity() {
     fun updateData() {
         val activity = this
         (applicationContext as MainApplication).applicationScope.launch {
+                activity.generateDailyQuests()
                 val data = Utils.DBgetAll(applicationContext)
                 quests = data.first.toMutableList()
                 collectedTreasures = data.second.toMutableList()
@@ -180,5 +179,29 @@ class MainActivity : AppCompatActivity() {
 
                 }
         }
+    }
+
+    private fun generateDailyQuests() {
+        val lastTimestamp = Utils.getLastDailyQuestUpdate(this)?.toLong()
+        val currentTime = getCurrentDateTimestamp()
+        if(lastTimestamp == null || currentTime >= (lastTimestamp + Utils.DAY_IN_MILLIS) ) {
+            for(i in 0 until Utils.NUMBER_OF_DAILY_QUESTS) {
+                if(last_position != null) {
+                    val quest = Utils.generateQuest(last_position!!)
+                    quests.add(quest)
+                    Utils.DBinsert(quest, applicationContext)
+                }
+            }
+            Utils.writeToSharedPrefs("daily_quest_update_timestamp", currentTime.toString(), this)
+        }
+    }
+
+    private fun getCurrentDateTimestamp() : Long {
+        val calendar = Calendar.getInstance()
+        calendar[Calendar.HOUR_OF_DAY] = 0
+        calendar[Calendar.MINUTE] = 0
+        calendar[Calendar.SECOND] = 0
+        calendar[Calendar.MILLISECOND] = 0
+        return calendar.timeInMillis
     }
 }
