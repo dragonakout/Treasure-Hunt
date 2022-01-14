@@ -30,6 +30,12 @@ object Utils {
     val AVERAGE_WALKING_SPEED_IN_KMPH = 4
 
 
+    val PERMISSIONS_KEY = "permissions"
+    val ACTION_PERMISSIONS_GRANTED = "GetPermissionsActivity.permissions_granted"
+    val ACTION_PERMISSIONS_DENIED = "GetPermissionsActivity.permissions_denied"
+
+
+
     // from https://stackoverflow.com/a/60337241/11725219
     fun formatIntString(int: Int) : String {
         return StringBuilder(int.toString().reversed()).replace("...".toRegex(), "$0 ").reversed()
@@ -64,7 +70,7 @@ object Utils {
 
     private fun getRandomPositionFromCenter(pos: LatLng, distance: Int): LatLng {
         val possibleMultipliers = listOf(-1, 1)
-        val surfaceAngle = Random().nextDouble()
+        val surfaceAngle = Random().nextDouble() * 2
 
         val latitudeOrientation = possibleMultipliers[Random().nextInt(possibleMultipliers.size)]
         val longitudeOrientation = possibleMultipliers[Random().nextInt(possibleMultipliers.size)]
@@ -193,22 +199,19 @@ object Utils {
     }
 
     fun DBinsert(treasure : Any, applicationContext : Context?) {
-        (applicationContext as MainApplication).applicationScope.launch {
-            when (treasure) {
-                is Quest -> {
-                    (applicationContext as MainApplication).database.QuestDao()
-                        .createQuest(treasure)
-                }
-                is Treasure -> {
-                    (applicationContext as MainApplication).database.TreasuresDao()
-                        .createTreasure(treasure)
-                }
+        when (treasure) {
+            is Quest -> {
+                (applicationContext as MainApplication).database.QuestDao()
+                    .createQuest(treasure)
+            }
+            is Treasure -> {
+                (applicationContext as MainApplication).database.TreasuresDao()
+                    .createTreasure(treasure)
             }
         }
     }
 
     fun DBdelete(treasure : Any, applicationContext : Context?) {
-        (applicationContext as MainApplication).applicationScope.launch {
             when(treasure) {
                 is Quest -> {
                     (applicationContext as MainApplication).database.QuestDao().deleteQuest(treasure)
@@ -217,13 +220,19 @@ object Utils {
                     (applicationContext as MainApplication).database.TreasuresDao().deleteTreasure(treasure)
                 }
             }
-        }
     }
 
     fun DBgetAll(applicationContext : Context?) : Pair<List<Quest>, List<Treasure>> {
             val quests = (applicationContext as MainApplication).database.QuestDao().getAllQuests()
             val treasures = (applicationContext as MainApplication).database.TreasuresDao().getAllTreasure()
         return Pair(quests, treasures)
+    }
+
+    fun DBaddMultiplieQuests(applicationContext : Context?, quests: List<Quest>){
+          (applicationContext as MainApplication).database.QuestDao().makeAllQuestsSeen()
+            for(quest in quests) {
+                DBinsert(quest, applicationContext)
+            }
     }
 
     fun generateQuest(position: LatLng): Quest {

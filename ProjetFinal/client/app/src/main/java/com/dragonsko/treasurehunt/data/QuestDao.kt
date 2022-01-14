@@ -15,4 +15,7 @@ interface QuestDao {
 
     @Query("SELECT * FROM quest")
     fun getAllQuests() : List<Quest>
+
+    @Query("UPDATE quest SET is_new = 0 ")
+    fun makeAllQuestsSeen()
 }

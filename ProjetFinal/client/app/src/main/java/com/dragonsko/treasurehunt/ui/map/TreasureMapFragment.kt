@@ -43,7 +43,7 @@ class TreasureMapFragment : Fragment(), OnMapReadyCallback {
         val lat = (activity as MainActivity).last_position?.latitude
         val long = (activity as MainActivity).last_position?.longitude
         return if(lat == null || long == null) {
-            LatLng(45.38206, -71.92831) // UdeS
+            LatLng(0.0,0.0) // UdeS
         } else {
             (activity as MainActivity).last_position!!
         }
@@ -60,7 +60,7 @@ class TreasureMapFragment : Fragment(), OnMapReadyCallback {
         currentPositionMarker?.remove()
         currentPositionMarker = map.addMarker(
             MarkerOptions()
-                .icon(BitmapDescriptorFactory.fromResource(R.raw.img_maps_marker))
+                .icon(BitmapDescriptorFactory.fromResource(R.raw.img_maps_marker2))
                 .position(LatLng(lastlocationCoords!!.latitude, lastlocationCoords!!.longitude))
         )
         var coords = getInitialLocation()
@@ -98,7 +98,7 @@ class TreasureMapFragment : Fragment(), OnMapReadyCallback {
         currentPositionMarker?.remove()
         currentPositionMarker = map?.addMarker(
             MarkerOptions()
-                .icon(BitmapDescriptorFactory.fromResource(R.raw.img_maps_marker))
+                .icon(BitmapDescriptorFactory.fromResource(R.raw.img_maps_marker2))
                 .position(LatLng(lastlocationCoords!!.latitude, lastlocationCoords!!.longitude))
         )
         if(arguments?.get("lattitude") == null || arguments?.get("longitude") == null ) {

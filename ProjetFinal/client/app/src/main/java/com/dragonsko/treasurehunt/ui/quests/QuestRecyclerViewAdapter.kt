@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
@@ -39,7 +38,7 @@ class QuestRecyclerViewAdapter(val context: Context, var data: MutableList<Quest
         holder.questLengthView.text = "Durée de la quête: ${quest.estimated_time}"
         holder.questItemRootView.setOnClickListener {
             val bundle = bundleOf(Pair("lattitude", quest.latitude.toFloat()), Pair("longitude", quest.longitude.toFloat()))
-            Toast.makeText(context,"Emplacement: ${quest.latitude}, ${quest.longitude}", Toast.LENGTH_SHORT).show()
+            //DEBUG ONLY : Toast.makeText(context,"Emplacement: ${quest.latitude}, ${quest.longitude}", Toast.LENGTH_SHORT).show()
             holder.itemView.findNavController().navigate(R.id.action_navigation_booty_list_to_navigation_treasure_map, bundle)
         }
         holder.questItemRootView.setOnLongClickListener {

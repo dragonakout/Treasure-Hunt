@@ -10,15 +10,19 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.os.Build
 import android.os.IBinder
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.dragonsko.treasurehunt.MainActivity
+import com.dragonsko.treasurehunt.MainApplication
 import com.dragonsko.treasurehunt.R
 import com.dragonsko.treasurehunt.Utils
 import com.dragonsko.treasurehunt.data.Quest
 import com.dragonsko.treasurehunt.data.Treasure
 import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.launch
 import java.io.Serializable
 import java.util.*
 
@@ -56,7 +60,7 @@ class LocationService : Service(), Serializable, LocationListener {
             NotificationManager.IMPORTANCE_LOW
         )
         val snoozeIntent = Intent("stop_service")
-        val snoozePendingIntent = PendingIntent.getBroadcast(this, 0, snoozeIntent, 0)
+        val snoozePendingIntent = PendingIntent.getBroadcast(this, 0, snoozeIntent, PendingIntent.FLAG_IMMUTABLE)
 
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
@@ -84,6 +88,8 @@ class LocationService : Service(), Serializable, LocationListener {
                     Manifest.permission.ACCESS_FINE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
+                requestBackgroundPermission()
+                activity?.updateData()
                 val locationManager = ContextCompat.getSystemService(
                     applicationContext,
                     LocationManager::class.java
@@ -98,6 +104,22 @@ class LocationService : Service(), Serializable, LocationListener {
                 initialized = true;
             }
         }
+    }
+
+    private fun requestBackgroundPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+                val bgPermission = mutableListOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                if (activity != null) {
+                    PermissionManager().ask(activity!!, bgPermission, fun() {activity?.updateData()})
+                }
+            }
+        }
+
     }
 
     override fun onLocationChanged(location: Location) {
@@ -126,20 +148,22 @@ class LocationService : Service(), Serializable, LocationListener {
     }
 
     fun collectTreasure(quest: Quest) {
-        Utils.DBdelete(quest, applicationContext)
-        val collectedTreasure = Treasure(quest, getCurrentDate())
-        activity?.quests?.remove(quest)
-        activity?.collectedTreasures?.add(collectedTreasure)
-        Utils.DBinsert(collectedTreasure, applicationContext)
+        (applicationContext as MainApplication).applicationScope.launch {
+            Utils.DBdelete(quest, applicationContext)
+            val collectedTreasure = Treasure(quest, getCurrentDate())
+            activity?.quests?.remove(quest)
+            activity?.collectedTreasures?.add(collectedTreasure)
+            Utils.DBinsert(collectedTreasure, applicationContext)
 
-        val notifTitle = "Butin récupéré !"
-        val notifShort = "Vous avez collecté le ${quest.name.lowercase(Locale.getDefault())} !"
-        val notifDesc =
-            "En collectant le ${quest.name.lowercase(Locale.getDefault())}, vous avez obtenu ${quest.actual_value} pièces"
-        Utils.createNotification(this, notifTitle, notifShort, notifDesc, quest.id)
-        if (isActivityActive) {
-            Utils.createButtonedDialog(activity, notifTitle, notifDesc, fun() {}, false)
-            activity?.updateData()
+            val notifTitle = "Butin récupéré !"
+            val notifShort = "Vous avez collecté le ${quest.name.lowercase(Locale.getDefault())} !"
+            val notifDesc =
+                "En collectant le ${quest.name.lowercase(Locale.getDefault())}, vous avez obtenu ${quest.actual_value} pièces"
+            Utils.createNotification(applicationContext, notifTitle, notifShort, notifDesc, quest.id)
+            if (isActivityActive) {
+                Utils.createButtonedDialog(activity, notifTitle, notifDesc, fun() {}, false)
+                activity?.updateData()
+            }
         }
     }
 

@@ -7,7 +7,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.widget.EditText
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
@@ -19,10 +18,13 @@ import com.dragonsko.treasurehunt.data.Quest
 import com.dragonsko.treasurehunt.data.Treasure
 import com.dragonsko.treasurehunt.databinding.ActivityMainBinding
 import com.dragonsko.treasurehunt.service.LocationService
+import com.dragonsko.treasurehunt.service.PermissionManager
 import com.dragonsko.treasurehunt.ui.quests.QuestsFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.util.*
 
 
@@ -44,20 +46,17 @@ class MainActivity : AppCompatActivity() {
     lateinit var quests : MutableList<Quest>
     lateinit var collectedTreasures : MutableList<Treasure>
     var service : LocationService? = null
+    val isUpdatingMtx : Mutex = Mutex(false)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        addTreasure()
-
-
-        requestLocationPermission()
 
         quests = mutableListOf()
         collectedTreasures = mutableListOf()
 
         if(Utils.getUserId(this).isNullOrBlank()) {
-            createIdAlert()
+            requestLocationPermission()
         }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -73,43 +72,26 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
     }
 
-    private fun addTreasure() {
-    }
-
     private fun requestLocationPermission() {
-        val locationPermissionRequest = registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) { permissions ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                when {
-                    permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                    }
-                    permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                    } else -> {
-                }
-                }
-            }
-            InitializeLocationService()
-        }
+
         // If we already have permissions
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED) {
-            InitializeLocationService()
+            initializeLocationService()
             return
         } else {
+            val permissions = mutableListOf( Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+            }
+
             val title = "Autorisation d'utiliser les données de localisation"
             val text = "Treasure Hunt utilise les données de positionnement afin de vous attribuer des trésors. Afin que l'application puisse bien fonctionner, vous devez autoriser la localisation en tout temps."
-            Utils.createButtonedDialog(this, title,text , fun() {}, false)
+            Utils.createButtonedDialog(this, title,text , fun() { PermissionManager().ask(this, permissions, ::initializeLocationService) }, false)
         }
-        val permissions = mutableListOf( Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-        }
-        locationPermissionRequest.launch(permissions.toTypedArray())
-        InitializeLocationService()
     }
 
-    private fun InitializeLocationService() {
+    private fun initializeLocationService() {
         val activity = this
         (applicationContext as MainApplication).applicationScope.launch {
             service = LocationService.getLocationService(applicationContext, activity)
@@ -121,7 +103,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if(service == null) {  InitializeLocationService() }
+        if(service == null) {  initializeLocationService() }
         service?.isActivityActive = true
         service?.quests = null
     }
@@ -160,9 +142,10 @@ class MainActivity : AppCompatActivity() {
     fun updateData() {
         val activity = this
         (applicationContext as MainApplication).applicationScope.launch {
+            isUpdatingMtx.withLock {
                 activity.generateDailyQuests()
                 val data = Utils.DBgetAll(applicationContext)
-                quests = data.first.toMutableList()
+                quests = data.first.toMutableList().reversed().toMutableList()
                 collectedTreasures = data.second.toMutableList()
 
                 val navHostFragment = activity.supportFragmentManager
@@ -178,6 +161,7 @@ class MainActivity : AppCompatActivity() {
                     }
 
                 }
+            }
         }
     }
 
@@ -185,14 +169,18 @@ class MainActivity : AppCompatActivity() {
         val lastTimestamp = Utils.getLastDailyQuestUpdate(this)?.toLong()
         val currentTime = getCurrentDateTimestamp()
         if(lastTimestamp == null || currentTime >= (lastTimestamp + Utils.DAY_IN_MILLIS) ) {
-            for(i in 0 until Utils.NUMBER_OF_DAILY_QUESTS) {
-                if(last_position != null) {
+            if(last_position != null) {
+                val newQuests = mutableListOf<Quest>()
+
+                for(i in 0 until Utils.NUMBER_OF_DAILY_QUESTS) {
                     val quest = Utils.generateQuest(last_position!!)
-                    quests.add(quest)
-                    Utils.DBinsert(quest, applicationContext)
+                    newQuests.add(quest)
                 }
+                Utils.DBaddMultiplieQuests(applicationContext, newQuests)
+                quests.addAll(newQuests)
+
+                Utils.writeToSharedPrefs("daily_quest_update_timestamp", currentTime.toString(), this)
             }
-            Utils.writeToSharedPrefs("daily_quest_update_timestamp", currentTime.toString(), this)
         }
     }
 

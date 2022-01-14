@@ -9,9 +9,11 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.dragonsko.treasurehunt.MainActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.dragonsko.treasurehunt.MainApplication
 import com.dragonsko.treasurehunt.Utils
 import com.dragonsko.treasurehunt.data.Quest
 import com.dragonsko.treasurehunt.databinding.FragmentQuestsBinding
+import kotlinx.coroutines.launch
 
 class QuestsFragment : Fragment() {
 
@@ -53,7 +55,9 @@ class QuestsFragment : Fragment() {
         treasures.remove(quest)
         recyclerViewAdapter.notifyDataSetChanged()
         updateNoQuestUI(treasures.size <= 0)
-        Utils.DBdelete(quest, activity?.applicationContext)
+        (activity?.applicationContext as MainApplication).applicationScope.launch {
+            Utils.DBdelete(quest, activity?.applicationContext)
+        }
     }
 
     override fun onDestroyView() {

@@ -27,6 +27,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="com.dragonsko.treasurehunt.service.AskPermissionActivity" android:theme="@style/Theme.Transparent" />
+
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
