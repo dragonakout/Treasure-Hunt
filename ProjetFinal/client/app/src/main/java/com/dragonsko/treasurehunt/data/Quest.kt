@@ -14,7 +14,7 @@ import org.json.JSONObject
 data class Quest(
     @PrimaryKey(autoGenerate = true) val id: Int,
     @ColumnInfo(name = "name") val name: String,
-    @ColumnInfo(name = "estimated_time") val estimated_time: String,
+    @ColumnInfo(name = "distance") val distance: Int,
     @ColumnInfo(name = "estimated_value") val estimated_value: Int,
     @ColumnInfo(name = "actual_value") val actual_value: Int,
     @ColumnInfo(name = "latitude") val latitude: Double,

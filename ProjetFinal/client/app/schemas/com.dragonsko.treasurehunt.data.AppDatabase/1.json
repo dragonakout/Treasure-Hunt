@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "f1f9f6cf52037968d2abaee7a0d0e0bb",
+    "identityHash": "c023740649e80734caff7418c145116d",
     "entities": [
       {
         "tableName": "Quest",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `estimated_time` TEXT NOT NULL, `estimated_value` INTEGER NOT NULL, `actual_value` INTEGER NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `is_new` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `distance` INTEGER NOT NULL, `estimated_value` INTEGER NOT NULL, `actual_value` INTEGER NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `is_new` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -21,9 +21,9 @@
             "notNull": true
           },
           {
-            "fieldPath": "estimated_time",
-            "columnName": "estimated_time",
-            "affinity": "TEXT",
+            "fieldPath": "distance",
+            "columnName": "distance",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -108,7 +108,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f1f9f6cf52037968d2abaee7a0d0e0bb')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c023740649e80734caff7418c145116d')"
     ]
   }
 }

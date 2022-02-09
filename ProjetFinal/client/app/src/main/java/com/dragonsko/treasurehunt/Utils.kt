@@ -22,18 +22,18 @@ object Utils {
     val FOREGROUND_SERVICE_ID = 4242690
     val EARTH_RADIUS_KM = 6371
     val GEOFENCE_RADIUS_IN_METERS = 100.0
-    val NUMBER_OF_DAILY_QUESTS = 3
-    val AVERAGE_DISTANCE_M = 1000
+    val MAX_NUMBER_OF_DAILY_QUESTS = 2
+    val AVERAGE_DISTANCE_M = 2000
     val DAY_IN_MILLIS = 86400000
     val COIN_ESTIMATE_DIVIDER = 100
     val COIN_ACTUAL_DIVIDER = 5
-    val AVERAGE_WALKING_SPEED_IN_KMPH = 4
+    val AVERAGE_WALKING_SPEED_IN_KMPH = 5
+    val AVERAGE_RUNNING_SPEED_IN_KMPH = 9
 
 
     val PERMISSIONS_KEY = "permissions"
     val ACTION_PERMISSIONS_GRANTED = "GetPermissionsActivity.permissions_granted"
     val ACTION_PERMISSIONS_DENIED = "GetPermissionsActivity.permissions_denied"
-
 
 
     // from https://stackoverflow.com/a/60337241/11725219
@@ -171,30 +171,30 @@ object Utils {
         }
     }
 
-    fun readFloatFromSharedPrefs(key: String, activity: Activity?) : Float? {
-        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return null
+    fun readFloatFromSharedPrefs(key: String, activity: Activity?) : Float {
+        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return 0f
         return sharedPref.getFloat(key, 0f)
     }
 
-    fun readStringFromSharedPrefs(key: String, activity: Activity?) : String? {
-        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return null
-        return sharedPref.getString(key, "")
+    fun readStringFromSharedPrefs(key: String, activity: Activity?) : String {
+        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return ""
+        return sharedPref.getString(key, "") as String
     }
 
-    fun readIntFromSharedPrefs(key: String, activity: Activity?) : Int? {
-        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return null
+    fun readIntFromSharedPrefs(key: String, activity: Activity?) : Int {
+        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return 0
         return sharedPref.getInt(key, 0)
     }
 
     fun getUserId(activity: Activity?): String? {
-        val userId = readStringFromSharedPrefs("user_id", activity)
-        return if( userId == "" || userId == null) {
+        val userId = readStringFromSharedPrefs(Keys.USER_ID, activity)
+        return if( userId == "") {
             null
         } else userId
     }
 
     fun getLastDailyQuestUpdate(activity: Activity?): String? {
-        val timestamp = readStringFromSharedPrefs("daily_quest_update_timestamp", activity)
+        val timestamp = readStringFromSharedPrefs(Keys.DAILY_QUEST_TIMESTAMP, activity)
         return if( timestamp.isNullOrBlank()) null else timestamp
     }
 
@@ -235,20 +235,38 @@ object Utils {
             }
     }
 
-    fun generateQuest(position: LatLng): Quest {
+    fun generateQuest(position: LatLng, activity: Activity?): Quest {
         val multiplier = (Random().nextGaussian() + 3) / 3
-        val distance = (AVERAGE_DISTANCE_M * multiplier).toInt()
-        val treasurePos = getRandomPositionFromCenter(position, distance)
+        val averageDistance = getDistanceFromPrefs(activity)
+        val distance = (averageDistance * multiplier).toInt()
+        val treasurePos = getRandomPositionFromCenter(position, (distance.toFloat() / 2).toInt())
         val values = getValuesFromDistance(distance)
-        val estimatedTime = getTimeFromDistance(distance)
-        val questName = NameGenerator.generateQuestName(distance, AVERAGE_DISTANCE_M)
-        return Quest(0, questName, estimatedTime, values.first,values.second, treasurePos.latitude,treasurePos.longitude, true)
+        val questName = NameGenerator.generateQuestName(multiplier)
+        return Quest(0, questName, distance, values.first,values.second, treasurePos.latitude,treasurePos.longitude, true)
     }
 
-    private fun getTimeFromDistance(distance: Int): String {
+    private fun getDistanceFromPrefs(activity: Activity?) : Int  {
+        val prefMeasurement = readIntFromSharedPrefs(Keys.DISTANCE_MEASUREMENT, activity) != 0 // true if distance, false if time
+        if(prefMeasurement) {
+            val distance = readIntFromSharedPrefs(Keys.DISTANCE_VALUE_DISTANCE, activity) * 1000
+            return if(distance > 0) distance else AVERAGE_DISTANCE_M
+        } else {
+            val prefTransportation = readIntFromSharedPrefs(Keys.TRANSPORTATION_MEAN, activity) != 0 // true if run, false if walk
+            val timeDistance = readIntFromSharedPrefs(Keys.DISTANCE_VALUE_TIME, activity)
+            if (timeDistance <= 0) return AVERAGE_DISTANCE_M
+            return if(prefTransportation) {
+                (timeDistance.toFloat() / 60 * AVERAGE_RUNNING_SPEED_IN_KMPH * 1000).toInt()
+            } else {
+                (timeDistance.toFloat() / 60 * AVERAGE_WALKING_SPEED_IN_KMPH * 1000).toInt()
+            }
+        }
+    }
+
+    private fun getTimeFromDistance(distance: Int, isRunning: Boolean): String {
         val timeString : String
         val actualDistance = distance.toDouble() * 2
-        val numberOfHours = Math.floor(actualDistance / (AVERAGE_WALKING_SPEED_IN_KMPH * 1000)).toInt()
+        val averageSpeed = if(isRunning) AVERAGE_RUNNING_SPEED_IN_KMPH else AVERAGE_WALKING_SPEED_IN_KMPH
+        val numberOfHours = Math.floor(actualDistance / (averageSpeed * 1000)).toInt()
         if(numberOfHours > 24) {
             timeString = "${Math.floor( (numberOfHours / 24).toDouble() ).toInt()} jours"
         }
@@ -259,7 +277,7 @@ object Utils {
                 "$numberOfHours heures"
             }
         } else {
-            timeString = "${Math.floor((actualDistance / (AVERAGE_WALKING_SPEED_IN_KMPH * 1000)) * 60.0).toInt() } minutes"
+            timeString = "${Math.floor((actualDistance / (averageSpeed * 1000)) * 60.0).toInt() } minutes"
         }
         return timeString
     }
@@ -270,6 +288,23 @@ object Utils {
         val actual = actual_tmp - actual_tmp % COIN_ACTUAL_DIVIDER
 
         return Pair(estimate, actual.toInt())
+    }
+
+    fun formatTimePreviewWithPrefs(distanceInM: Int, activity: Activity?): String {
+        val prefMeasurement = readIntFromSharedPrefs(Keys.DISTANCE_MEASUREMENT_PREVIEW, activity) != 0 // true if distance, false if time
+        val isRunning = readIntFromSharedPrefs(Keys.TRANSPORTATION_MEAN, activity) != 0 // true if running, false if walking
+        var previewText = ""
+        previewText = if(prefMeasurement) {
+            if(distanceInM < 1000) {
+                "$distanceInM m"
+            } else {
+                "${(distanceInM.toFloat() / 1000).toString().substring(0,3)} km"
+            }
+        } else{
+            getTimeFromDistance(distanceInM, isRunning)
+        }
+
+        return previewText
     }
 
 }

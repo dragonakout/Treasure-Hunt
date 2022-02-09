@@ -35,7 +35,7 @@ class QuestRecyclerViewAdapter(val context: Context, var data: MutableList<Quest
         val quest: Quest = data[position]
         holder.treasureNameView.text = "${quest.name}"
         holder.estimatedValueView.text = "Trésor estimé: ${Utils.formatIntString(quest.estimated_value)} "
-        holder.questLengthView.text = "Durée de la quête: ${quest.estimated_time}"
+        holder.questLengthView.text = Utils.formatTimePreviewWithPrefs(quest.distance, context as Activity?)
         holder.questItemRootView.setOnClickListener {
             val bundle = bundleOf(Pair("lattitude", quest.latitude.toFloat()), Pair("longitude", quest.longitude.toFloat()))
             //DEBUG ONLY : Toast.makeText(context,"Emplacement: ${quest.latitude}, ${quest.longitude}", Toast.LENGTH_SHORT).show()

@@ -65,8 +65,7 @@ object NameGenerator {
             Pair("inimaginable", "inimaginable"),
         )
 
-    fun generateQuestName(distance: Int, averageDistance: Int): String {
-        val ratio = distance.toDouble() / averageDistance
+    fun generateQuestName(ratio: Double): String {
         var treasureName = ""
         val name_i = Random().nextInt(MAIN_NAME.size)
         val name = MAIN_NAME[name_i]

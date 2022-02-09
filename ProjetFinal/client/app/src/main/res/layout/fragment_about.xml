@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/title_about"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="10dp"
+        android:text="Mot du développeur"
+        android:textStyle="bold"
+        android:textSize="24dp"
+        />
+
+    <TextView
+        android:id="@+id/desc_about"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/title_about"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:layout_marginTop="5dp"
+        android:text="Grâce à Treasure Hunt, vous pouvez découvrir les lieux de votre entourage sous un nouvel angle.\n\nLa génération des quêtes étant complètement aléatoire, n'hésitez pas à supprimer les quêtes impossible à collecter afin qu'elle ne polluent pas votre interface.\n\nJ'espère que vous aurez autant de plaisir à découvrir les trésors de votre entourage que j'en ai eu lors de la réalisation de ce projet!\n\nBonne chance pirate, que les vents vous soient favorables!"
+        android:textSize="14dp"
+        />
+
+
+    <TextView
+        android:id="@+id/title_thanks"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/desc_about"
+        app:layout_constraintStart_toStartOf="@id/title_about"
+        android:layout_marginTop="10dp"
+        android:text="Remerciements"
+        android:textStyle="bold"
+        android:textSize="24dp"
+        />
+
+
+    <TextView
+        android:id="@+id/desc_thanks_icons_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/title_thanks"
+        app:layout_constraintStart_toStartOf="@id/title_about"
+        android:text="Icônes"
+        android:textSize="18dp"
+        android:textStyle="bold"
+        />
+
+    <TextView
+        android:id="@+id/desc_thanks_icons_names"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/desc_thanks_icons_title"
+        app:layout_constraintStart_toStartOf="@id/title_about"
+        android:text="- bqlqn
+     \n- Freepik
+     \n- Muhazdinata
+     \n- juicy_fish
+     \n- Google Material Design"
+        android:textSize="14dp"
+        />
+
+    <TextView
+        android:id="@+id/desc_thanks_api_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/desc_thanks_icons_names"
+        app:layout_constraintStart_toStartOf="@id/title_about"
+        android:text="APIs"
+        android:textSize="18dp"
+        android:textStyle="bold"
+        />
+
+    <TextView
+        android:id="@+id/desc_thanks_api_names"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/desc_thanks_api_title"
+        app:layout_constraintStart_toStartOf="@id/title_about"
+        android:text="- Google Maps"
+        android:textSize="14dp"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

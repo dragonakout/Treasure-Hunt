@@ -3,16 +3,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_booty_list">
+    app:startDestination="@+id/navigation_quest_list">
 
     <fragment
-        android:id="@+id/navigation_booty_list"
+        android:id="@+id/navigation_quest_list"
         android:name="com.dragonsko.treasurehunt.ui.quests.QuestsFragment"
         android:label="@string/title_quests"
         tools:layout="@layout/fragment_quests" >
         <action
             android:id="@+id/action_navigation_booty_list_to_navigation_treasure_map"
             app:destination="@id/navigation_treasure_map" />
+        <action
+            android:id="@+id/action_navigation_quest_list_to_navigation_about"
+            app:destination="@id/navigation_about" />
+        <action
+            android:id="@+id/action_navigation_quest_list_to_navigation_settings"
+            app:destination="@id/navigation_settings" />
     </fragment>
 
     <fragment
@@ -29,8 +35,22 @@
     </fragment>
 
     <fragment
-        android:id="@+id/navigation_aquired_booties"
+        android:id="@+id/navigation_collected_treasures"
         android:name="com.dragonsko.treasurehunt.ui.treasures.TreasuresFragment"
         android:label="@string/title_aquired"
         tools:layout="@layout/fragment_treasures" />
+
+    <fragment
+        android:id="@+id/navigation_settings"
+        android:name="com.dragonsko.treasurehunt.ui.prefs.SettingsFragment"
+        android:label="Préférences"
+        tools:layout="@layout/fragment_settings" />
+
+    <fragment
+        android:id="@+id/navigation_about"
+        android:name="com.dragonsko.treasurehunt.ui.prefs.AboutFragment"
+        android:label="À propos"
+        tools:layout="@layout/fragment_about" />
+
+
 </navigation>

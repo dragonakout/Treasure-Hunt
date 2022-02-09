@@ -30,7 +30,6 @@ import java.util.*
 class LocationService : Service(), Serializable, LocationListener {
     private var initialized: Boolean = false
     var activity: MainActivity? = null
-    var isActivityActive : Boolean = false
     var quests: List<Quest>? = null
     private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -126,7 +125,7 @@ class LocationService : Service(), Serializable, LocationListener {
         checkGeofences(location.latitude, location.longitude)
         activity?.last_position = LatLng(location.latitude, location.longitude)
         activity?.updateData()
-        if (isActivityActive) {
+        if (activity != null) {
             mapNotify?.let { it(LatLng(location.latitude, location.longitude)) }
         }
     }
@@ -160,9 +159,11 @@ class LocationService : Service(), Serializable, LocationListener {
             val notifDesc =
                 "En collectant le ${quest.name.lowercase(Locale.getDefault())}, vous avez obtenu ${quest.actual_value} pièces"
             Utils.createNotification(applicationContext, notifTitle, notifShort, notifDesc, quest.id)
-            if (isActivityActive) {
-                Utils.createButtonedDialog(activity, notifTitle, notifDesc, fun() {}, false)
-                activity?.updateData()
+            if (activity != null) {
+                activity?.runOnUiThread {
+                    Utils.createButtonedDialog(activity, notifTitle, notifDesc, fun() {}, false)
+                    activity?.updateData()
+                }
             }
         }
     }
@@ -200,7 +201,6 @@ class LocationService : Service(), Serializable, LocationListener {
             context.startForegroundService(serviceIntent)
             while (INSTANCE == null) {}
             INSTANCE!!.activity = mainActivity
-            INSTANCE!!.isActivityActive = true
             return INSTANCE!!
         }
 

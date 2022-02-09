@@ -30,16 +30,6 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    /** TODO:
-     Put this in about page in settings:
-     Icons from:
-     - bqlqn
-     - Freepik
-     - Muhazdinata
-     - juicy_fish
-     - Google Material Design
-     - Google Maps
-     */
     private lateinit var binding: ActivityMainBinding
     var last_position: LatLng? = null
 
@@ -52,6 +42,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        //TODO REMOVE THIS IS FOR DEBUG ONLY
+        applicationContext.deleteDatabase("app_database")
+        Utils.writeToSharedPrefs(Keys.DAILY_QUEST_TIMESTAMP,"0",this)
+
+
         quests = mutableListOf()
         collectedTreasures = mutableListOf()
 
@@ -62,14 +57,20 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val navView: BottomNavigationView = binding.navBar
-
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
 
-        val appBarConfiguration = AppBarConfiguration(setOf(
-                R.id.navigation_booty_list, R.id.navigation_treasure_map, R.id.navigation_aquired_booties))
-        setupActionBarWithNavController(navController, appBarConfiguration)
+        val navView: BottomNavigationView = binding.navBar
+
+
+          val appbarConfig = AppBarConfiguration(setOf(
+                R.id.navigation_quest_list, R.id.navigation_treasure_map, R.id.navigation_collected_treasures))
+        setupActionBarWithNavController(navController, appbarConfig)
         navView.setupWithNavController(navController)
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        findNavController(R.id.nav_host_fragment_activity_main).navigateUp()
+        return super.onSupportNavigateUp()
     }
 
     private fun requestLocationPermission() {
@@ -101,22 +102,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
     override fun onResume() {
         super.onResume()
         if(service == null) {  initializeLocationService() }
-        service?.isActivityActive = true
         service?.quests = null
     }
 
     override fun onPause() {
         super.onPause()
-        service?.isActivityActive = false
         service?.quests = quests
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        service?.reset()
+        service?.stopSelf()
     }
 
 
@@ -133,7 +133,7 @@ class MainActivity : AppCompatActivity() {
         alert.setPositiveButton("Confirmer",
             DialogInterface.OnClickListener { dialog, whichButton -> // What ever you want to do with the value
                 val writtenUserId = edittext.text.toString()
-                Utils.writeToSharedPrefs("user_id", writtenUserId, this)
+                Utils.writeToSharedPrefs(Keys.USER_ID, writtenUserId, this)
             })
 
         alert.show()
@@ -156,8 +156,10 @@ class MainActivity : AppCompatActivity() {
                     questsFragment.recyclerViewAdapter.data.clear()
                     questsFragment.recyclerViewAdapter.data.addAll(quests)
                     runOnUiThread{
-                        questsFragment.recyclerViewAdapter.notifyDataSetChanged()
-                        questsFragment.updateNoQuestUI(quests.size <= 0)
+                        if(questsFragment.binding != null) {
+                            questsFragment.recyclerViewAdapter.notifyDataSetChanged()
+                            questsFragment.updateNoQuestUI(quests.size <= 0)
+                        }
                     }
 
                 }
@@ -172,14 +174,17 @@ class MainActivity : AppCompatActivity() {
             if(last_position != null) {
                 val newQuests = mutableListOf<Quest>()
 
-                for(i in 0 until Utils.NUMBER_OF_DAILY_QUESTS) {
-                    val quest = Utils.generateQuest(last_position!!)
+                var numberOfQuests = Utils.readIntFromSharedPrefs(Keys.NB_DAILY_QUEST,this)
+                numberOfQuests = if (numberOfQuests == 0) Utils.MAX_NUMBER_OF_DAILY_QUESTS else numberOfQuests
+
+                for(i in 0 until numberOfQuests) {
+                    val quest = Utils.generateQuest(last_position!!, this)
                     newQuests.add(quest)
                 }
                 Utils.DBaddMultiplieQuests(applicationContext, newQuests)
                 quests.addAll(newQuests)
 
-                Utils.writeToSharedPrefs("daily_quest_update_timestamp", currentTime.toString(), this)
+                Utils.writeToSharedPrefs(Keys.DAILY_QUEST_TIMESTAMP, currentTime.toString(), this)
             }
         }
     }
