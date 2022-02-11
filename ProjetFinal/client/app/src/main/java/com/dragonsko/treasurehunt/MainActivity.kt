@@ -42,11 +42,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        //TODO REMOVE THIS IS FOR DEBUG ONLY
-        applicationContext.deleteDatabase("app_database")
-        Utils.writeToSharedPrefs(Keys.DAILY_QUEST_TIMESTAMP,"0",this)
-
-
         quests = mutableListOf()
         collectedTreasures = mutableListOf()
 
