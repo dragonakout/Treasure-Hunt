@@ -11,3 +11,4 @@ Collect treasures and gamify exploring your neighborhood with this neat little A
 - Google Maps API
 - Maps SDK
 - Room Database
+- LocationManager and Geolocation usage
