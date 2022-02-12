@@ -8,6 +8,6 @@ Collect treasures and gamify exploring your neighborhood with this neat little A
 
 ## Technical Aspects
 - Entirely Kotlin
-- Uses Google Maps API
+- Google Maps API
 - Maps SDK
 - Room Database
