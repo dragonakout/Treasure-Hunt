@@ -12,7 +12,7 @@ Collect treasures and gamify exploring your neighborhood with this neat little A
 - Maps SDK
 - Room Database
 - LocationManager and Geofencing
-- Full dark mode support
+- Full dark/light mode support
 
 ## Screenshots
 
